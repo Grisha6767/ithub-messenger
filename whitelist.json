@@ -1,0 +1,108 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "login": "111",
+      "password": "1111",
+      "role": "teacher",
+      "fullName": "Анна Петрова",
+      "groups": [
+        "1ПР",
+        "1Д",
+        "1РИ",
+        "1ВР"
+      ],
+      "subjects": [
+        "Web-разработка",
+        "Базы данных"
+      ],
+      "avatar": "avatar_1789065442756_photo_2026-08-20_22-13-47.jpg"
+    },
+    {
+      "id": 2,
+      "login": "teacher2@ithub.ru",
+      "password": "pass123",
+      "role": "teacher",
+      "fullName": "Иван Смирнов",
+      "groups": [
+        "1ПР",
+        "1Д"
+      ],
+      "subjects": [
+        "Алгоритмы",
+        "Python"
+      ],
+      "avatar": null
+    },
+    {
+      "id": 3,
+      "login": "teacher3@ithub.ru",
+      "password": "pass123",
+      "role": "teacher",
+      "fullName": "Мария Козлова",
+      "groups": [
+        "1РИ",
+        "1ВР"
+      ],
+      "subjects": [
+        "Дизайн",
+        "UX/UI"
+      ],
+      "avatar": null
+    },
+    {
+      "id": 4,
+      "login": "student1@ithub.ru",
+      "password": "pass123",
+      "role": "student",
+      "fullName": "Дмитрий Иванов",
+      "group": "1ПР",
+      "avatar": null
+    },
+    {
+      "id": 5,
+      "login": "student2@ithub.ru",
+      "password": "pass123",
+      "role": "student",
+      "fullName": "Елена Соколова",
+      "group": "1ПР",
+      "avatar": null
+    },
+    {
+      "id": 6,
+      "login": "student3@ithub.ru",
+      "password": "pass123",
+      "role": "student",
+      "fullName": "Алексей Фёдоров",
+      "group": "1Д",
+      "avatar": null
+    },
+    {
+      "id": 7,
+      "login": "student4@ithub.ru",
+      "password": "pass123",
+      "role": "student",
+      "fullName": "Ольга Морозова",
+      "group": "1РИ",
+      "avatar": null
+    },
+    {
+      "id": 8,
+      "login": "student5@ithub.ru",
+      "password": "pass123",
+      "role": "student",
+      "fullName": "Павел Новиков",
+      "group": "1ВР",
+      "avatar": null
+    },
+    {
+      "id": 9,
+      "login": "student6@ithub.ru",
+      "password": "pass123",
+      "role": "student",
+      "fullName": "Мария Волкова",
+      "group": "1ПР",
+      "avatar": null
+    }
+  ]
+}
