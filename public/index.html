@@ -1,9 +1,14 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ITHub Мессенджер</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#7C5CFC">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <style>
     :root {
       --bg-primary: #FFFFFF;
@@ -21,6 +26,7 @@
       --scrollbar: #D0D0E0;
       --danger: #E74C3C;
       --online: #4ADE80;
+      --away: #FBBF24;
     }
 
     body.dark {
@@ -60,6 +66,26 @@
       transition: background 0.3s;
     }
 
+    /* ===== АНИМАЦИИ ===== */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.92); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes messageIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .message-wrapper {
+      animation: messageIn 0.25s ease;
+    }
+
     /* ===== ВХОД ===== */
     .login-container {
       width: 100%;
@@ -70,6 +96,7 @@
       align-items: center;
       background: var(--bg-primary);
       padding: 20px;
+      animation: fadeIn 0.4s ease;
     }
 
     .login-card {
@@ -81,6 +108,7 @@
       width: 100%;
       text-align: center;
       border: 1px solid var(--border);
+      animation: popIn 0.3s ease;
     }
 
     .login-card h1 { font-size: 32px; color: var(--text-primary); margin-bottom: 8px; }
@@ -111,14 +139,15 @@
       font-weight: 600;
       cursor: pointer;
       margin-top: 12px;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.1s;
     }
 
     .login-card button:hover { background: var(--accent-hover); }
+    .login-card button:active { transform: scale(0.98); }
     .login-card .forgot { color: var(--text-secondary); font-size: 14px; text-decoration: none; margin-top: 16px; display: inline-block; }
     .login-card .error-text { color: var(--accent); font-size: 14px; margin-top: 10px; min-height: 20px; }
 
-    .messenger { display: none; width: 100%; height: 100%; flex: 1; }
+    .messenger { display: none; width: 100%; height: 100%; flex: 1; animation: fadeIn 0.3s ease; }
 
     /* ===== БОКОВАЯ ПАНЕЛЬ ===== */
     .sidebar {
@@ -135,14 +164,62 @@
     }
 
     .sidebar-header {
-      padding: 20px 24px 16px;
+      padding: 14px 20px 12px;
       border-bottom: 1px solid var(--border);
       background: var(--bg-secondary);
       flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
     }
 
-    .sidebar-header h3 { font-size: 20px; color: var(--text-primary); }
-    .sidebar-header .user-info { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+    .ithub-logo {
+      width: auto;
+      height: 46px;
+      display: block;
+    }
+
+    .sidebar-header-info {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    /* ===== ЛОГОТИП: СВЕТЛАЯ ТЕМА ===== */
+    .ithub-logo .logo-dark {
+      stroke: #1A1A2E;
+    }
+    .ithub-logo .logo-dark-fill {
+      fill: #1A1A2E;
+      stroke: none;
+    }
+    .ithub-logo .logo-dark-text {
+      fill: #1A1A2E;
+      stroke: none;
+    }
+    .ithub-logo .logo-gray {
+      fill: #B0B0B0;
+      stroke: none;
+    }
+
+    /* ===== ЛОГОТИП: ТЁМНАЯ ТЕМА ===== */
+    body.dark .ithub-logo .logo-dark {
+      stroke: #FFFFFF;
+    }
+    body.dark .ithub-logo .logo-dark-fill {
+      fill: #FFFFFF;
+    }
+    body.dark .ithub-logo .logo-dark-text {
+      fill: #FFFFFF;
+    }
+    body.dark .ithub-logo .logo-gray {
+      fill: #FFFFFF;
+    }
 
     .group-filter {
       display: flex;
@@ -194,15 +271,15 @@
       align-items: center;
       padding: 12px 20px;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.15s, transform 0.1s;
       border-left: 3px solid transparent;
       position: relative;
     }
 
     .contact-item:hover { background: var(--bg-hover); }
+    .contact-item:active { transform: scale(0.99); }
     .contact-item.active { background: var(--bg-hover); border-left-color: var(--accent); }
 
-    /* ===== АВАТАРКА ===== */
     .avatar {
       width: 46px;
       height: 46px;
@@ -232,19 +309,21 @@
       object-fit: cover;
     }
 
-    /* Онлайн-кружок — только у тех, кто в сети */
     .avatar .online-dot {
       position: absolute;
       bottom: -1px;
       right: -1px;
       width: 14px;
       height: 14px;
-      background: var(--online);
       border-radius: 50%;
       border: 3px solid var(--bg-secondary);
       box-shadow: 0 0 0 1px var(--border);
       z-index: 2;
+      transition: background 0.3s;
     }
+
+    .avatar .online-dot.online { background: var(--online); }
+    .avatar .online-dot.away { background: var(--away); }
 
     .contact-info { flex: 1; min-width: 0; }
     .contact-name { font-size: 15px; color: var(--text-primary); font-weight: 500; }
@@ -259,7 +338,6 @@
       font-weight: 600;
     }
 
-    /* ===== ОБЛАСТЬ ЧАТА ===== */
     .chat-area {
       flex: 1;
       display: flex;
@@ -303,7 +381,30 @@
 
     .chat-header-left .clickable-name:hover { opacity: 0.75; }
 
-    /* ===== МЕНЮ ПОЛЬЗОВАТЕЛЯ ===== */
+    .chat-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      transition: background 0.2s;
+      color: var(--accent);
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-action-btn:hover { background: var(--bg-hover); }
+    .header-action-btn svg { width: 20px; height: 20px; }
+
     .user-menu-wrapper { position: relative; cursor: pointer; flex-shrink: 0; }
 
     .user-avatar-btn {
@@ -343,6 +444,7 @@
       display: none;
       z-index: 1000;
       border: 1px solid var(--border);
+      animation: popIn 0.15s ease;
     }
 
     .dropdown-menu.show { display: block; }
@@ -380,7 +482,6 @@
 
     .dropdown-user-info strong { color: var(--text-primary); display: block; font-size: 15px; }
 
-    /* ===== СООБЩЕНИЯ ===== */
     .messages-area {
       flex: 1;
       padding: 24px 32px;
@@ -425,7 +526,33 @@
       border-bottom-left-radius: 4px;
     }
 
-    /* ===== ГОЛОСОВОЕ ===== */
+    .reply-quote {
+      padding: 6px 10px;
+      border-left: 3px solid var(--accent);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      background: rgba(124, 92, 252, 0.1);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .reply-quote:hover { background: rgba(124, 92, 252, 0.2); }
+    .reply-quote .reply-author { font-weight: 600; color: var(--accent); display: block; font-size: 12px; }
+    .reply-quote .reply-text { color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+
+    .message-wrapper.my .reply-quote { background: rgba(255, 255, 255, 0.2); }
+    .message-wrapper.my .reply-quote .reply-author { color: #FFFFFF; }
+    .message-wrapper.my .reply-quote .reply-text { color: rgba(255, 255, 255, 0.8); }
+
+    .message-status {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-left: 6px;
+    }
+
+    .message-status.read { color: var(--accent); }
+
     .voice-message {
       display: flex;
       align-items: center;
@@ -481,7 +608,6 @@
       text-align: right;
     }
 
-    /* ===== КОНТЕКСТНОЕ МЕНЮ ===== */
     .context-menu {
       position: fixed;
       background: var(--bg-primary);
@@ -492,6 +618,7 @@
       min-width: 160px;
       z-index: 5000;
       display: none;
+      animation: popIn 0.15s ease;
     }
 
     .context-menu.show { display: block; }
@@ -529,6 +656,9 @@
       color: var(--text-secondary);
       margin-top: 4px;
       padding: 0 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .no-messages {
@@ -538,11 +668,129 @@
       font-size: 16px;
     }
 
-    .message-bubble img { max-width: 240px; border-radius: 10px; display: block; }
+    .message-bubble img {
+      max-width: 240px;
+      border-radius: 10px;
+      display: block;
+      cursor: pointer;
+      transition: transform 0.15s, filter 0.15s;
+    }
+
+    .message-bubble img:hover {
+      transform: scale(1.02);
+      filter: brightness(1.05);
+    }
+
     .message-bubble a { color: inherit; text-decoration: none; }
     .message-wrapper.my .message-bubble a { color: #FFFFFF; }
 
-    /* ===== ПАНЕЛЬ РЕДАКТИРОВАНИЯ ===== */
+    .image-viewer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .image-viewer.show { display: flex; }
+
+    .image-viewer img {
+      max-width: 92%;
+      max-height: 92%;
+      border-radius: 8px;
+      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
+      animation: popIn 0.25s ease;
+    }
+
+    .image-viewer .close-viewer {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      border-radius: 50%;
+      color: #FFFFFF;
+      font-size: 28px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      backdrop-filter: blur(6px);
+    }
+
+    .image-viewer .close-viewer:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .image-viewer .download-btn {
+      position: absolute;
+      top: 20px;
+      right: 84px;
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      border-radius: 50%;
+      color: #FFFFFF;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      backdrop-filter: blur(6px);
+    }
+
+    .image-viewer .download-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .image-viewer .download-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .typing-indicator {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-style: italic;
+    }
+
+    .typing-indicator.show { display: flex; }
+
+    .typing-dots {
+      display: inline-flex;
+      gap: 3px;
+    }
+
+    .typing-dots span {
+      width: 5px;
+      height: 5px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: typingBounce 1.2s infinite;
+    }
+
+    .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-4px); opacity: 1; }
+    }
+
     .edit-panel {
       display: none;
       align-items: center;
@@ -552,6 +800,7 @@
       border-top: 1px solid var(--border);
       font-size: 14px;
       color: var(--text-primary);
+      animation: fadeIn 0.2s ease;
     }
 
     .edit-panel.show { display: flex; }
@@ -582,7 +831,6 @@
 
     .edit-panel .cancel-btn:hover { color: var(--danger); }
 
-    /* ===== ПОЛЕ ВВОДА ===== */
     .input-area {
       display: flex;
       align-items: center;
@@ -595,7 +843,7 @@
       transition: background 0.3s;
     }
 
-    .input-area.editing { border-top-color: var(--accent); }
+    .input-area.editing, .input-area.replying { border-top-color: var(--accent); }
 
     .input-area .btn-icon {
       background: none;
@@ -639,7 +887,7 @@
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.1s;
       flex-shrink: 0;
       display: flex;
       align-items: center;
@@ -647,12 +895,12 @@
     }
 
     .input-area .btn-send:hover { background: var(--accent-hover); }
+    .input-area .btn-send:active { transform: scale(0.97); }
     .input-area .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
     .input-area .btn-send svg { width: 18px; height: 18px; }
 
     #file-input { display: none; }
 
-    /* ===== МОДАЛКА ===== */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -664,6 +912,7 @@
       align-items: center;
       justify-content: center;
       z-index: 2000;
+      animation: fadeIn 0.2s ease;
     }
 
     .modal-overlay.show { display: flex; }
@@ -676,14 +925,9 @@
       width: 92%;
       box-shadow: 0 20px 60px var(--shadow);
       border: 1px solid var(--border);
-      animation: modalIn 0.2s ease;
+      animation: popIn 0.25s ease;
       max-height: 90vh;
       overflow-y: auto;
-    }
-
-    @keyframes modalIn {
-      from { opacity: 0; transform: scale(0.95) translateY(10px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
     }
 
     .modal h2 { font-size: 22px; color: var(--text-primary); margin-bottom: 16px; }
@@ -707,7 +951,6 @@
 
     .modal .close-btn:hover { background: var(--accent-hover); }
 
-    /* ===== АВАТАРКА В ПРОФИЛЕ ===== */
     .profile-avatar-section {
       display: flex;
       flex-direction: column;
@@ -763,7 +1006,6 @@
       margin-top: 8px;
     }
 
-    /* ===== СМЕНА ПАРОЛЯ ===== */
     .profile-actions {
       display: flex;
       gap: 10px;
@@ -840,7 +1082,6 @@
       min-height: 18px;
     }
 
-    /* Настройки */
     .settings-field {
       display: flex;
       align-items: center;
@@ -881,7 +1122,107 @@
 
     .toggle.active .knob { transform: translateX(22px); }
 
-    /* ===== АДАПТИВ ===== */
+    .search-messages-panel {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 28px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      animation: fadeIn 0.2s ease;
+    }
+
+    .search-messages-panel.show { display: flex; }
+
+    .search-messages-panel input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+
+    .search-messages-panel input:focus { outline: none; border-color: var(--accent); }
+
+    .search-messages-panel .close-search {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 20px;
+      padding: 0 6px;
+    }
+
+    .search-messages-panel .close-search:hover { color: var(--danger); }
+
+    .search-messages-panel .search-count {
+      font-size: 13px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .message-wrapper.highlight { animation: highlight 1.5s ease; }
+
+    @keyframes highlight {
+      0%, 100% { background: transparent; }
+      50% { background: rgba(124, 92, 252, 0.15); }
+    }
+
+    .reply-panel {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 28px;
+      background: var(--bg-hover);
+      border-top: 1px solid var(--border);
+      font-size: 14px;
+      color: var(--text-primary);
+      animation: fadeIn 0.2s ease;
+    }
+
+    .reply-panel.show { display: flex; }
+
+    .reply-panel .reply-bar {
+      width: 3px;
+      height: 32px;
+      background: var(--accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .reply-panel .reply-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .reply-panel .reply-to-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .reply-panel .reply-to-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .reply-panel .cancel-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 20px;
+      padding: 0 6px;
+      transition: color 0.2s;
+    }
+
+    .reply-panel .cancel-btn:hover { color: var(--danger); }
+
     @media (max-width: 768px) {
       .sidebar { width: 220px; min-width: 160px; }
       .chat-header { padding: 12px 18px; min-height: 64px; }
@@ -894,11 +1235,12 @@
       .user-avatar-btn { width: 38px; height: 38px; font-size: 15px; }
       .avatar { width: 38px; height: 38px; font-size: 15px; }
       .login-card { padding: 32px 24px; }
+      .ithub-logo { height: 40px; }
     }
 
     @media (max-width: 480px) {
       .sidebar { width: 60px; min-width: 60px; }
-      .sidebar-header h3, .sidebar-header .user-info, .search-box, .contact-info, .group-filter { display: none !important; }
+      .search-box, .contact-info, .group-filter, .ithub-logo, .sidebar-header-info { display: none !important; }
       .contact-item { justify-content: center; padding: 12px 0; }
       .avatar { margin-right: 0; width: 38px; height: 38px; font-size: 14px; }
       .chat-header .chat-contact-status { font-size: 12px; }
@@ -917,8 +1259,8 @@
     <div class="login-card">
       <h1>Добро пожаловать!</h1>
       <p class="subtitle">Войдите в ITHub Messenger</p>
-      <input type="email" id="email" placeholder="Email" />
-      <input type="password" id="password" placeholder="Пароль" onkeydown="if(event.key==='Enter') login()" />
+      <input type="email" id="email" placeholder="Email" autocomplete="username" />
+      <input type="password" id="password" placeholder="Пароль" autocomplete="current-password" onkeydown="if(event.key==='Enter') login()" />
       <button onclick="login()">Войти</button>
       <div class="error-text" id="login-error"></div>
       <a href="#" class="forgot" onclick="alert('Обратитесь к администратору')">Забыли пароль?</a>
@@ -928,13 +1270,36 @@
   <!-- ===== МЕССЕНДЖЕР ===== -->
   <div class="messenger" id="messenger">
     <div class="sidebar">
+      <!-- Логотип ITHub MSG + имя пользователя под ним -->
       <div class="sidebar-header">
-        <h3>Контакты</h3>
-        <div class="user-info" id="sidebar-user-info">Загрузка...</div>
+        <svg class="ithub-logo" viewBox="0 0 210 60" xmlns="http://www.w3.org/2000/svg">
+          <!-- Квадрат 1 (верх-лево) -->
+          <rect x="4" y="8" width="20" height="20" fill="none" stroke-width="3" class="logo-dark"/>
+          <!-- Точка внутри первого квадрата — залитая -->
+          <rect x="11" y="15" width="6" height="6" class="logo-dark-fill"/>
+
+          <!-- Квадрат 2 (верх-право) со скошенным верхним-правым углом -->
+          <path d="M 32 8 L 46 8 L 52 14 L 52 28 L 32 28 Z"
+                fill="none" stroke-width="3" class="logo-dark"/>
+
+          <!-- Квадрат 3 (низ-лево) -->
+          <rect x="4" y="32" width="20" height="20" fill="none" stroke-width="3" class="logo-dark"/>
+
+          <!-- Квадрат 4 (низ-право) -->
+          <rect x="32" y="32" width="20" height="20" fill="none" stroke-width="3" class="logo-dark"/>
+
+          <!-- Текст ITHub -->
+          <text x="64" y="26" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" class="logo-dark-text">ITHub</text>
+
+          <!-- Текст MSG -->
+          <text x="64" y="49" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" class="logo-gray">MSG</text>
+        </svg>
+        <div class="sidebar-header-info" id="sidebar-user-info">Загрузка...</div>
       </div>
+
       <div class="group-filter" id="group-filter" style="display:none;"></div>
       <div class="search-box">
-        <input type="text" id="search-input" placeholder="Поиск..." oninput="filterContacts()" />
+        <input type="text" id="search-input" placeholder="Поиск контактов..." oninput="filterContacts()" />
       </div>
       <div class="contacts-list" id="contacts-list"></div>
     </div>
@@ -949,41 +1314,67 @@
           </div>
         </div>
 
-        <div class="user-menu-wrapper">
-          <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleDropdown()">
-            <span id="user-avatar-letters">?</span>
-          </div>
-          <div class="dropdown-menu" id="dropdown-menu">
-            <div class="dropdown-user-info">
-              <strong id="dropdown-user-name">Имя</strong>
-              <span id="dropdown-user-role">Роль</span>
+        <div class="chat-header-actions">
+          <button class="header-action-btn" id="search-msg-btn" onclick="toggleSearchMessages()" title="Поиск по сообщениям" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+
+          <div class="user-menu-wrapper">
+            <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleDropdown()">
+              <span id="user-avatar-letters">?</span>
             </div>
-            <div class="dropdown-divider"></div>
-            <button class="dropdown-item" onclick="openProfile()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              Профиль
-            </button>
-            <button class="dropdown-item" onclick="openSettings()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-              Настройки
-            </button>
-            <div class="dropdown-divider"></div>
-            <button class="dropdown-item logout" onclick="logout()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-              Выйти
-            </button>
+            <div class="dropdown-menu" id="dropdown-menu">
+              <div class="dropdown-user-info">
+                <strong id="dropdown-user-name">Имя</strong>
+                <span id="dropdown-user-role">Роль</span>
+              </div>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item" onclick="openProfile()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Профиль
+              </button>
+              <button class="dropdown-item" onclick="openSettings()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                Настройки
+              </button>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item logout" onclick="logout()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Выйти
+              </button>
+            </div>
           </div>
         </div>
+      </div>
+
+      <div class="search-messages-panel" id="search-messages-panel">
+        <input type="text" id="search-messages-input" placeholder="Поиск по сообщениям..." oninput="searchInMessages()" />
+        <span class="search-count" id="search-messages-count"></span>
+        <button class="close-search" onclick="toggleSearchMessages()">×</button>
       </div>
 
       <div class="messages-area" id="messages-area">
         <div class="no-messages">Выберите собеседника, чтобы начать чат</div>
       </div>
 
+      <div class="typing-indicator" id="typing-indicator">
+        <span id="typing-name"></span> печатает
+        <span class="typing-dots"><span></span><span></span><span></span></span>
+      </div>
+
       <div class="edit-panel" id="edit-panel">
         <svg class="edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         <div class="edit-text" id="edit-text">Редактирование сообщения</div>
         <button class="cancel-btn" onclick="cancelEdit()" title="Отменить">×</button>
+      </div>
+
+      <div class="reply-panel" id="reply-panel">
+        <div class="reply-bar"></div>
+        <div class="reply-info">
+          <div class="reply-to-name" id="reply-to-name">Имя</div>
+          <div class="reply-to-text" id="reply-to-text">Текст сообщения</div>
+        </div>
+        <button class="cancel-btn" onclick="cancelReply()" title="Отменить">×</button>
       </div>
 
       <div class="input-area" id="input-area">
@@ -1013,7 +1404,14 @@
   </div>
 </div>
 
-<!-- Скрытый input для аватарки -->
+<div class="image-viewer" id="image-viewer" onclick="closeImageViewer(event)">
+  <button class="download-btn" onclick="downloadImage(event)" title="Скачать">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+  </button>
+  <button class="close-viewer" onclick="closeImageViewer(event)">×</button>
+  <img id="image-viewer-img" src="" alt="" onclick="event.stopPropagation()" />
+</div>
+
 <input type="file" id="avatar-input" accept="image/*" style="display:none;" />
 
 <script src="/socket.io/socket.io.js"></script>
@@ -1032,7 +1430,12 @@
   let selectedGroup = 'all';
   let editingMessage = null;
   let editingWrapper = null;
+  let replyingTo = null;
   let onlineUsers = [];
+  let typingTimer = null;
+  let isTyping = false;
+  let searchQuery = '';
+  let currentImageUrl = '';
 
   // ===== DOM =====
   const loginContainer = document.getElementById('login-container');
@@ -1054,6 +1457,18 @@
   const editText = document.getElementById('edit-text');
   const inputArea = document.getElementById('input-area');
   const avatarInput = document.getElementById('avatar-input');
+  const typingIndicator = document.getElementById('typing-indicator');
+  const typingName = document.getElementById('typing-name');
+  const replyPanel = document.getElementById('reply-panel');
+  const replyToName = document.getElementById('reply-to-name');
+  const replyToText = document.getElementById('reply-to-text');
+  const searchMessagesPanel = document.getElementById('search-messages-panel');
+  const searchMessagesInput = document.getElementById('search-messages-input');
+  const searchMessagesCount = document.getElementById('search-messages-count');
+  const searchMsgBtn = document.getElementById('search-msg-btn');
+
+  const imageViewer = document.getElementById('image-viewer');
+  const imageViewerImg = document.getElementById('image-viewer-img');
 
   const userAvatarBtn = document.getElementById('user-avatar-btn');
   const dropdownMenu = document.getElementById('dropdown-menu');
@@ -1072,10 +1487,65 @@
   }
   applyTheme();
 
+  // ===== УВЕДОМЛЕНИЯ =====
+  function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }
+
+  function showNotification(fromName, text) {
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+    if (document.hasFocus()) return;
+    if (localStorage.getItem('notifications') === 'false') return;
+
+    try {
+      const n = new Notification('ITHub — ' + fromName, {
+        body: text,
+        icon: '/favicon.ico',
+        tag: 'ithub-msg'
+      });
+      setTimeout(() => n.close(), 5000);
+    } catch (e) {
+      console.error('Ошибка уведомления:', e);
+    }
+  }
+
+  // ===== ПРОСМОТР ИЗОБРАЖЕНИЙ =====
+  function openImageViewer(src) {
+    currentImageUrl = src;
+    imageViewerImg.src = src;
+    imageViewer.classList.add('show');
+  }
+
+  function closeImageViewer(e) {
+    if (e && e.target !== e.currentTarget && e.target.className !== 'close-viewer') return;
+    imageViewer.classList.remove('show');
+    imageViewerImg.src = '';
+    currentImageUrl = '';
+  }
+
+  function downloadImage(e) {
+    e.stopPropagation();
+    if (!currentImageUrl) return;
+    const a = document.createElement('a');
+    a.href = currentImageUrl;
+    a.download = currentImageUrl.split('/').pop();
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && imageViewer.classList.contains('show')) {
+      closeImageViewer();
+    }
+  });
+
   // ===== РЕНДЕР АВАТАРКИ =====
   function renderAvatar(el, user, size) {
     el.innerHTML = '';
-
     const inner = document.createElement('div');
     inner.className = 'avatar-inner';
 
@@ -1088,15 +1558,16 @@
     }
     el.appendChild(inner);
 
-    // Онлайн-кружок — только в списке контактов и только если пользователь онлайн
-    if (size === 'small' && onlineUsers.includes(user.id)) {
-      const dot = document.createElement('span');
-      dot.className = 'online-dot';
-      el.appendChild(dot);
+    if (size === 'small') {
+      const online = onlineUsers.find(u => u.id === user.id);
+      if (online && (online.status === 'online' || online.status === 'away')) {
+        const dot = document.createElement('span');
+        dot.className = 'online-dot ' + online.status;
+        el.appendChild(dot);
+      }
     }
   }
 
-  // ===== РЕНДЕР АВАТАРКИ В ШАПКЕ ЧАТА =====
   function renderChatAvatar() {
     if (!currentContactId) return;
     const contact = contacts.find(c => c.id === currentContactId);
@@ -1116,19 +1587,41 @@
     chatAvatar.appendChild(inner);
   }
 
-  // ===== ОБНОВЛЕНИЕ СТАТУСА В ШАПКЕ =====
-  function updateChatHeaderOnline() {
+  function getStatusText(userId) {
+    const online = onlineUsers.find(u => u.id === userId);
+    if (online) {
+      if (online.status === 'online') return { text: 'в сети', color: 'var(--online)' };
+      if (online.status === 'away') return { text: 'отошёл', color: 'var(--away)' };
+    }
+    const contact = contacts.find(c => c.id === userId);
+    if (contact && contact.lastSeen) {
+      return { text: 'был(а) ' + formatLastSeen(contact.lastSeen), color: 'var(--text-secondary)' };
+    }
+    return { text: 'не в сети', color: 'var(--text-secondary)' };
+  }
+
+  function formatLastSeen(iso) {
+    const d = new Date(iso);
+    const now = new Date();
+    const diff = (now - d) / 1000;
+    if (diff < 60) return 'только что';
+    if (diff < 3600) return Math.floor(diff / 60) + ' мин назад';
+    if (diff < 86400) return Math.floor(diff / 3600) + ' ч назад';
+    return d.toLocaleDateString('ru-RU');
+  }
+
+  function updateChatHeaderStatus() {
     if (!currentContactId) return;
     const contact = contacts.find(c => c.id === currentContactId);
     if (!contact) return;
 
-    const isOnline = onlineUsers.includes(contact.id);
     const sub = contact.role === 'teacher'
       ? (contact.groups ? `Преподаватель · ${contact.groups.join(', ')}` : 'Преподаватель')
       : (contact.group ? `Студент · ${contact.group}` : 'Студент');
 
-    chatContactStatus.textContent = isOnline ? `${sub} · онлайн` : sub;
-    chatContactStatus.style.color = isOnline ? 'var(--online)' : 'var(--accent)';
+    const st = getStatusText(contact.id);
+    chatContactStatus.textContent = `${sub} · ${st.text}`;
+    chatContactStatus.style.color = st.color;
   }
 
   // ===== ВХОД =====
@@ -1159,10 +1652,13 @@
           dropdownUserName.textContent = currentUser.fullName;
           dropdownUserRole.textContent = currentUser.role === 'teacher' ? 'Преподаватель' : 'Студент';
 
+          // Надпись под логотипом
+          sidebarUserInfo.textContent = `${currentUser.fullName} (${currentUser.role === 'teacher' ? 'Преподаватель' : 'Студент'})`;
+
+          requestNotificationPermission();
+
           socket = io();
           socket.emit('join', currentUser.id);
-
-          sidebarUserInfo.textContent = `${currentUser.fullName} (${currentUser.role === 'teacher' ? 'Преподаватель' : 'Студент'})`;
 
           loadContacts();
 
@@ -1180,11 +1676,31 @@
 
             if (msg.from_user === currentContactId) {
               addMessage(msg, 'other');
+              socket.emit('mark-read', { from: msg.from_user, to: currentUser.id });
+              fetch('/mark-read', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ from: msg.from_user, to: currentUser.id })
+              });
             } else {
               if (!unreadCounts[msg.from_user]) unreadCounts[msg.from_user] = 0;
               unreadCounts[msg.from_user]++;
               renderContacts();
               updateTitle();
+              const sender = contacts.find(c => c.id === msg.from_user);
+              if (sender) showNotification(sender.fullName, msg.text || 'Вложение');
+            }
+          });
+
+          socket.on('messages-read', (data) => {
+            if (data.by === currentContactId) {
+              messagesArea.querySelectorAll('.message-wrapper.my').forEach(w => {
+                const st = w.querySelector('.message-status');
+                if (st) {
+                  st.textContent = '✓✓';
+                  st.classList.add('read');
+                }
+              });
             }
           });
 
@@ -1192,12 +1708,14 @@
             const wrapper = messagesArea.querySelector(`[data-msg-id="${data.id}"]`);
             if (!wrapper) return;
             const bubble = wrapper.querySelector('.message-bubble');
-            bubble.innerHTML = '';
-            bubble.textContent = data.text;
-            const edited = document.createElement('span');
-            edited.className = 'message-edited';
-            edited.textContent = '(изменено)';
-            bubble.appendChild(edited);
+            const textNode = Array.from(bubble.childNodes).find(n => n.nodeType === 3);
+            if (textNode) textNode.textContent = data.text;
+            if (!bubble.querySelector('.message-edited')) {
+              const edited = document.createElement('span');
+              edited.className = 'message-edited';
+              edited.textContent = '(изменено)';
+              bubble.appendChild(edited);
+            }
           });
 
           socket.on('message-deleted', (data) => {
@@ -1211,27 +1729,45 @@
               contact.avatar = data.avatar;
               renderContacts();
             }
-            if (currentContactId === data.userId) {
-              renderChatAvatar();
-            }
+            if (currentContactId === data.userId) renderChatAvatar();
           });
 
-          // Онлайн-пользователи
           socket.on('online-users', (users) => {
             onlineUsers = users;
             renderContacts();
-            if (currentContactId) {
-              updateChatHeaderOnline();
+            if (currentContactId) updateChatHeaderStatus();
+          });
+
+          socket.on('user-typing', (data) => {
+            if (data.from === currentContactId) {
+              const contact = contacts.find(c => c.id === data.from);
+              typingName.textContent = contact ? contact.fullName : 'Собеседник';
+              typingIndicator.classList.add('show');
             }
           });
+
+          socket.on('user-stop-typing', (data) => {
+            if (data.from === currentContactId) {
+              typingIndicator.classList.remove('show');
+            }
+          });
+
+          window.addEventListener('focus', () => { if (socket) socket.emit('back', currentUser.id); });
+          window.addEventListener('blur', () => { if (socket) socket.emit('away', currentUser.id); });
 
           messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
               if (editingMessage) saveEdit();
               else sendMessage();
             }
-            if (e.key === 'Escape' && editingMessage) cancelEdit();
+            if (e.key === 'Escape') {
+              if (editingMessage) cancelEdit();
+              else if (replyingTo) cancelReply();
+            }
           });
+
+          messageInput.addEventListener('input', handleTyping);
+          document.addEventListener('paste', handlePaste);
 
           document.addEventListener('click', (e) => {
             if (!e.target.closest('.user-menu-wrapper')) {
@@ -1247,6 +1783,35 @@
         console.error('Ошибка входа:', err);
         loginError.textContent = 'Ошибка соединения с сервером';
       });
+  }
+
+  function handlePaste(e) {
+    if (!currentContactId) return;
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (!file) continue;
+        sendFileFromBlob(file, 'screenshot_' + Date.now() + '.png');
+        return;
+      }
+    }
+  }
+
+  function handleTyping() {
+    if (!socket || !currentContactId) return;
+    if (!isTyping) {
+      isTyping = true;
+      socket.emit('typing', { from: currentUser.id, to: currentContactId });
+    }
+    if (typingTimer) clearTimeout(typingTimer);
+    typingTimer = setTimeout(() => {
+      isTyping = false;
+      socket.emit('stop-typing', { from: currentUser.id, to: currentContactId });
+    }, 2000);
   }
 
   function toggleDropdown() { dropdownMenu.classList.toggle('show'); }
@@ -1267,7 +1832,6 @@
     pendingMessages.clear();
   }
 
-  // ===== ПРОФИЛЬ СЕБЯ =====
   function openProfile() {
     dropdownMenu.classList.remove('show');
     modalTitle.textContent = 'Профиль';
@@ -1284,7 +1848,6 @@
         </div>
         <div class="profile-avatar-hint">Нажмите, чтобы сменить аватарку</div>
       </div>
-
       <div class="field"><label>Имя</label><div class="value">${currentUser.fullName}</div></div>
       <div class="field"><label>Роль</label><div class="value">${currentUser.role === 'teacher' ? 'Преподаватель' : 'Студент'}</div></div>
       <div class="field"><label>Email</label><div class="value">${currentUser.login}</div></div>
@@ -1294,7 +1857,6 @@
       ` : `
         <div class="field"><label>Группа</label><div class="value">${currentUser.group || '—'}</div></div>
       `}
-
       <div class="profile-actions">
         <button class="profile-action-btn" onclick="openPasswordForm()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -1305,28 +1867,21 @@
     modalOverlay.classList.add('show');
   }
 
-  function chooseAvatar() {
-    avatarInput.click();
-  }
+  function chooseAvatar() { avatarInput.click(); }
 
   avatarInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     const formData = new FormData();
     formData.append('avatar', file);
     formData.append('userId', currentUser.id);
 
-    fetch('/upload-avatar', {
-      method: 'POST',
-      body: formData
-    })
+    fetch('/upload-avatar', { method: 'POST', body: formData })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
           currentUser.avatar = data.filename;
           renderAvatar(userAvatarBtn, currentUser, 'big');
-
           const bigAvatar = document.querySelector('.profile-avatar-big');
           if (bigAvatar) {
             bigAvatar.innerHTML = `<img src="/uploads/${data.filename}" /><div class="overlay">Сменить</div>`;
@@ -1343,7 +1898,6 @@
     avatarInput.value = '';
   });
 
-  // ===== СМЕНА ПАРОЛЯ =====
   function openPasswordForm() {
     modalBody.innerHTML = `
       <div class="password-form">
@@ -1363,9 +1917,7 @@
         <div class="error-msg" id="password-error"></div>
         <div class="success-msg" id="password-success"></div>
         <div style="margin-top:12px; text-align:center;">
-          <button class="profile-action-btn" onclick="openProfile()" style="width:100%;">
-            ← Назад к профилю
-          </button>
+          <button class="profile-action-btn" onclick="openProfile()" style="width:100%;">← Назад к профилю</button>
         </div>
       </div>
     `;
@@ -1377,35 +1929,18 @@
     const confirmPass = document.getElementById('confirm-password').value;
     const errorEl = document.getElementById('password-error');
     const successEl = document.getElementById('password-success');
-
     errorEl.textContent = '';
     successEl.textContent = '';
 
-    if (!oldPass || !newPass || !confirmPass) {
-      errorEl.textContent = 'Заполните все поля';
-      return;
-    }
-    if (newPass.length < 4) {
-      errorEl.textContent = 'Новый пароль должен быть минимум 4 символа';
-      return;
-    }
-    if (newPass !== confirmPass) {
-      errorEl.textContent = 'Пароли не совпадают';
-      return;
-    }
-    if (newPass === oldPass) {
-      errorEl.textContent = 'Новый пароль совпадает со старым';
-      return;
-    }
+    if (!oldPass || !newPass || !confirmPass) { errorEl.textContent = 'Заполните все поля'; return; }
+    if (newPass.length < 4) { errorEl.textContent = 'Новый пароль должен быть минимум 4 символа'; return; }
+    if (newPass !== confirmPass) { errorEl.textContent = 'Пароли не совпадают'; return; }
+    if (newPass === oldPass) { errorEl.textContent = 'Новый пароль совпадает со старым'; return; }
 
     fetch('/change-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: currentUser.id,
-        oldPassword: oldPass,
-        newPassword: newPass
-      })
+      body: JSON.stringify({ userId: currentUser.id, oldPassword: oldPass, newPassword: newPass })
     })
       .then(res => res.json())
       .then(data => {
@@ -1425,45 +1960,38 @@
       });
   }
 
-  // ===== ПРОФИЛЬ СОБЕСЕДНИКА =====
   function openContactProfile() {
     if (!currentContactId) return;
     const contact = contacts.find(c => c.id === currentContactId);
     if (!contact) return;
 
     modalTitle.textContent = 'Профиль';
-
     const avatarHtml = contact.avatar
       ? `<img src="/uploads/${contact.avatar}" />`
       : getInitials(contact.fullName);
+    const st = getStatusText(contact.id);
 
     let fieldsHtml = `
       <div class="profile-avatar-section">
-        <div class="profile-avatar-big" style="cursor:default;">
-          ${avatarHtml}
-        </div>
+        <div class="profile-avatar-big" style="cursor:default;">${avatarHtml}</div>
       </div>
+      <div class="field"><label>Статус</label><div class="value" style="color:${st.color}">${st.text}</div></div>
       <div class="field"><label>Имя</label><div class="value">${contact.fullName}</div></div>
       <div class="field"><label>Роль</label><div class="value">${contact.role === 'teacher' ? 'Преподаватель' : 'Студент'}</div></div>
       <div class="field"><label>Email</label><div class="value">${contact.login || '—'}</div></div>
     `;
-
     if (contact.role === 'teacher') {
       fieldsHtml += `
         <div class="field"><label>Группы</label><div class="value">${contact.groups && contact.groups.length ? contact.groups.join(', ') : '—'}</div></div>
         <div class="field"><label>Предметы</label><div class="value">${contact.subjects && contact.subjects.length ? contact.subjects.join(', ') : '—'}</div></div>
       `;
     } else {
-      fieldsHtml += `
-        <div class="field"><label>Группа</label><div class="value">${contact.group || '—'}</div></div>
-      `;
+      fieldsHtml += `<div class="field"><label>Группа</label><div class="value">${contact.group || '—'}</div></div>`;
     }
-
     modalBody.innerHTML = fieldsHtml;
     modalOverlay.classList.add('show');
   }
 
-  // ===== НАСТРОЙКИ =====
   function openSettings() {
     dropdownMenu.classList.remove('show');
     modalTitle.textContent = 'Настройки';
@@ -1478,9 +2006,7 @@
           </div>
           <div class="desc">Тёмное оформление интерфейса</div>
         </div>
-        <div class="toggle ${isDark ? 'active' : ''}" onclick="toggleTheme(this)">
-          <div class="knob"></div>
-        </div>
+        <div class="toggle ${isDark ? 'active' : ''}" onclick="toggleTheme(this)"><div class="knob"></div></div>
       </div>
       <div class="settings-field">
         <div>
@@ -1490,9 +2016,7 @@
           </div>
           <div class="desc">Показывать уведомления о новых сообщениях</div>
         </div>
-        <div class="toggle ${localStorage.getItem('notifications') !== 'false' ? 'active' : ''}" onclick="toggleNotifications(this)">
-          <div class="knob"></div>
-        </div>
+        <div class="toggle ${localStorage.getItem('notifications') !== 'false' ? 'active' : ''}" onclick="toggleNotifications(this)"><div class="knob"></div></div>
       </div>
     `;
     modalOverlay.classList.add('show');
@@ -1520,7 +2044,6 @@
     modalOverlay.classList.remove('show');
   }
 
-  // ===== КОНТАКТЫ =====
   function loadContacts() {
     fetch(`/contacts?userId=${currentUser.id}`)
       .then(res => res.json())
@@ -1538,12 +2061,10 @@
 
   function renderGroupFilter() {
     const container = document.getElementById('group-filter');
-
     if (currentUser.role !== 'teacher') {
       container.style.display = 'none';
       return;
     }
-
     container.style.display = 'flex';
     container.innerHTML = '';
 
@@ -1642,7 +2163,6 @@
   function filterContacts() {
     const query = searchInput.value.toLowerCase().trim();
     const items = contactsList.querySelectorAll('.contact-item');
-
     items.forEach(item => {
       const name = item.dataset.name?.toLowerCase() || '';
       const sub = item.dataset.sub?.toLowerCase() || '';
@@ -1652,7 +2172,6 @@
       if (currentUser.role === 'teacher' && selectedGroup !== 'all') {
         groupMatch = itemGroup === selectedGroup;
       }
-
       const textMatch = name.includes(query) || sub.includes(query);
       item.style.display = (groupMatch && textMatch) ? 'flex' : 'none';
     });
@@ -1663,16 +2182,15 @@
     document.title = total > 0 ? `ITHub (${total})` : 'ITHub Мессенджер';
   }
 
-  // ===== ЧАТ =====
   function openChat(contactId) {
     currentContactId = contactId;
     const contact = contacts.find(c => c.id === contactId);
     if (!contact) return;
 
     chatContactName.textContent = contact.fullName;
-
     renderChatAvatar();
-    updateChatHeaderOnline();
+    updateChatHeaderStatus();
+    searchMsgBtn.style.display = 'flex';
 
     messageInput.disabled = false;
     sendBtn.disabled = false;
@@ -1683,7 +2201,17 @@
     const idx = Array.from(items).findIndex(el => el.dataset.name === contact.fullName);
     if (idx !== -1 && items[idx]) items[idx].classList.add('active');
 
+    searchMessagesPanel.classList.remove('show');
+    searchMessagesInput.value = '';
+    searchQuery = '';
+
     loadMessages(contactId);
+
+    fetch('/mark-read', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: contactId, to: currentUser.id })
+    });
   }
 
   function loadMessages(contactId) {
@@ -1716,6 +2244,25 @@
     const bubble = document.createElement('div');
     bubble.className = 'message-bubble';
 
+    if (msg.reply_to && msg.reply_text) {
+      const replyQuote = document.createElement('div');
+      replyQuote.className = 'reply-quote';
+      const replyAuthor = msg.reply_from === currentUser.id ? 'Вы' : (contacts.find(c => c.id === msg.reply_from)?.fullName || 'Собеседник');
+      replyQuote.innerHTML = `
+        <span class="reply-author">${replyAuthor}</span>
+        <span class="reply-text">${msg.reply_text}</span>
+      `;
+      replyQuote.onclick = () => {
+        const target = messagesArea.querySelector(`[data-msg-id="${msg.reply_to}"]`);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          target.classList.add('highlight');
+          setTimeout(() => target.classList.remove('highlight'), 1500);
+        }
+      };
+      bubble.appendChild(replyQuote);
+    }
+
     if (msg.voice) {
       bubble.appendChild(createVoicePlayer(msg.voice));
     } else if (msg.file) {
@@ -1723,6 +2270,8 @@
       if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(ext)) {
         const img = document.createElement('img');
         img.src = '/uploads/' + msg.file;
+        img.alt = 'Изображение';
+        img.addEventListener('click', () => openImageViewer(img.src));
         bubble.appendChild(img);
       } else if (['mp3', 'wav', 'ogg'].includes(ext)) {
         bubble.appendChild(createVoicePlayer(msg.file));
@@ -1734,7 +2283,9 @@
         bubble.appendChild(link);
       }
     } else {
-      bubble.textContent = msg.text || '';
+      const textNode = document.createElement('span');
+      textNode.textContent = msg.text || '';
+      bubble.appendChild(textNode);
     }
 
     if (msg.edited) {
@@ -1749,38 +2300,44 @@
     const date = new Date(msg.timestamp);
     time.textContent = date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 
+    if (type === 'my') {
+      const status = document.createElement('span');
+      status.className = 'message-status' + (msg.read ? ' read' : '');
+      status.textContent = msg.read ? '✓✓' : '✓';
+      time.appendChild(status);
+    }
+
     wrapper.appendChild(bubble);
     wrapper.appendChild(time);
 
-    if (type === 'my') {
-      wrapper.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        const msgId = wrapper.dataset.msgId;
-        if (!msgId) return;
+    wrapper.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      const msgId = wrapper.dataset.msgId;
+      if (!msgId) return;
 
-        let text = '';
-        const voiceEl = bubble.querySelector('.voice-message');
-        const imgEl = bubble.querySelector('img');
-        const linkEl = bubble.querySelector('a');
-        if (voiceEl) text = '';
-        else if (imgEl) text = '';
-        else if (linkEl) text = '';
-        else {
-          const clone = bubble.cloneNode(true);
-          const ed = clone.querySelector('.message-edited');
-          if (ed) ed.remove();
-          text = clone.textContent.trim();
-        }
-        const msgObj = {
-          id: parseInt(msgId),
-          text: text,
-          from_user: currentUser.id,
-          voice: voiceEl ? true : null,
-          file: (imgEl || linkEl) ? true : null
-        };
-        showContextMenu(e.clientX, e.clientY, msgObj, wrapper);
-      });
-    }
+      let text = '';
+      const voiceEl = bubble.querySelector('.voice-message');
+      const imgEl = bubble.querySelector('img');
+      const linkEl = bubble.querySelector('a');
+      if (voiceEl) text = '🎤 Голосовое';
+      else if (imgEl) text = '🖼 Изображение';
+      else if (linkEl) text = '📎 Файл';
+      else {
+        const clone = bubble.cloneNode(true);
+        clone.querySelectorAll('.message-edited, .reply-quote').forEach(el => el.remove());
+        text = clone.textContent.trim();
+      }
+
+      const msgObj = {
+        id: parseInt(msgId),
+        text: text,
+        from_user: type === 'my' ? currentUser.id : (msg.from_user || null),
+        isMine: type === 'my',
+        voice: voiceEl ? true : null,
+        file: (imgEl || linkEl) ? true : null
+      };
+      showContextMenu(e.clientX, e.clientY, msgObj, wrapper);
+    });
 
     messagesArea.appendChild(wrapper);
     scrollToBottom();
@@ -1864,25 +2421,27 @@
     menu.style.left = x + 'px';
     menu.style.top = y + 'px';
 
-    if (msg.text && !msg.file && !msg.voice) {
-      const editBtn = document.createElement('button');
-      editBtn.className = 'context-menu-item';
-      editBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Изменить';
-      editBtn.onclick = () => {
-        menu.remove();
-        startEdit(msg, wrapper);
-      };
-      menu.appendChild(editBtn);
-    }
+    const replyBtn = document.createElement('button');
+    replyBtn.className = 'context-menu-item';
+    replyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg> Ответить';
+    replyBtn.onclick = () => { menu.remove(); startReply(msg, wrapper); };
+    menu.appendChild(replyBtn);
 
-    const delBtn = document.createElement('button');
-    delBtn.className = 'context-menu-item danger';
-    delBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Удалить';
-    delBtn.onclick = () => {
-      menu.remove();
-      deleteMessage(msg, wrapper);
-    };
-    menu.appendChild(delBtn);
+    if (msg.isMine) {
+      if (msg.text && !msg.file && !msg.voice && !msg.text.startsWith('🎤') && !msg.text.startsWith('🖼') && !msg.text.startsWith('📎')) {
+        const editBtn = document.createElement('button');
+        editBtn.className = 'context-menu-item';
+        editBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Изменить';
+        editBtn.onclick = () => { menu.remove(); startEdit(msg, wrapper); };
+        menu.appendChild(editBtn);
+      }
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'context-menu-item danger';
+      delBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Удалить';
+      delBtn.onclick = () => { menu.remove(); deleteMessage(msg, wrapper); };
+      menu.appendChild(delBtn);
+    }
 
     document.body.appendChild(menu);
 
@@ -1898,20 +2457,33 @@
     }, 10);
   }
 
+  function startReply(msg, wrapper) {
+    replyingTo = msg;
+    inputArea.classList.add('replying');
+    replyPanel.classList.add('show');
+    const author = msg.isMine ? 'Вы' : (contacts.find(c => c.id === msg.from_user)?.fullName || 'Собеседник');
+    replyToName.textContent = author;
+    replyToText.textContent = msg.text.length > 60 ? msg.text.substring(0, 60) + '...' : msg.text;
+    messageInput.focus();
+  }
+
+  function cancelReply() {
+    replyingTo = null;
+    inputArea.classList.remove('replying');
+    replyPanel.classList.remove('show');
+    messageInput.focus();
+  }
+
   function startEdit(msg, wrapper) {
     editingMessage = msg;
     editingWrapper = wrapper;
-
     editPanel.classList.add('show');
     editText.textContent = msg.text.length > 50 ? msg.text.substring(0, 50) + '...' : msg.text;
-
     messageInput.value = msg.text;
     messageInput.focus();
     messageInput.setSelectionRange(msg.text.length, msg.text.length);
-
     inputArea.classList.add('editing');
     sendBtnText.textContent = 'Сохранить';
-
     const sendIcon = sendBtn.querySelector('svg');
     if (sendIcon) sendIcon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
   }
@@ -1923,7 +2495,6 @@
     messageInput.value = '';
     inputArea.classList.remove('editing');
     sendBtnText.textContent = 'Отправить';
-
     const sendIcon = sendBtn.querySelector('svg');
     if (sendIcon) sendIcon.innerHTML = '<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>';
     messageInput.focus();
@@ -1932,34 +2503,26 @@
   function saveEdit() {
     if (!editingMessage || !editingWrapper) return;
     const newText = messageInput.value.trim();
-    if (!newText || newText === editingMessage.text) {
-      cancelEdit();
-      return;
-    }
+    if (!newText || newText === editingMessage.text) { cancelEdit(); return; }
 
     fetch('/edit-message', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: editingMessage.id,
-        text: newText,
-        from: currentUser.id
-      })
+      body: JSON.stringify({ id: editingMessage.id, text: newText, from: currentUser.id })
     })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
           const bubble = editingWrapper.querySelector('.message-bubble');
-          bubble.innerHTML = '';
-          bubble.textContent = newText;
-          const edited = document.createElement('span');
-          edited.className = 'message-edited';
-          edited.textContent = '(изменено)';
-          bubble.appendChild(edited);
-
+          const textNode = Array.from(bubble.childNodes).find(n => n.nodeType === 3);
+          if (textNode) textNode.textContent = newText;
+          if (!bubble.querySelector('.message-edited')) {
+            const edited = document.createElement('span');
+            edited.className = 'message-edited';
+            edited.textContent = '(изменено)';
+            bubble.appendChild(edited);
+          }
           editingMessage.text = newText;
-          editingMessage.edited = 1;
-
           cancelEdit();
         } else {
           alert('Не удалось изменить: ' + (data.error || 'неизвестная ошибка'));
@@ -1975,18 +2538,12 @@
     fetch('/delete-message', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: msg.id,
-        from: currentUser.id
-      })
+      body: JSON.stringify({ id: msg.id, from: currentUser.id })
     })
       .then(res => res.json())
       .then(data => {
-        if (data.success) {
-          wrapper.remove();
-        } else {
-          alert('Не удалось удалить: ' + (data.error || 'неизвестная ошибка'));
-        }
+        if (data.success) wrapper.remove();
+        else alert('Не удалось удалить: ' + (data.error || 'неизвестная ошибка'));
       })
       .catch(err => {
         console.error('Ошибка удаления:', err);
@@ -1994,9 +2551,33 @@
       });
   }
 
+  function toggleSearchMessages() {
+    searchMessagesPanel.classList.toggle('show');
+    if (searchMessagesPanel.classList.contains('show')) {
+      searchMessagesInput.focus();
+    } else {
+      searchMessagesInput.value = '';
+      searchQuery = '';
+      searchMessagesCount.textContent = '';
+      messagesArea.querySelectorAll('.message-wrapper').forEach(w => w.style.display = '');
+    }
+  }
+
+  function searchInMessages() {
+    searchQuery = searchMessagesInput.value.toLowerCase().trim();
+    const items = messagesArea.querySelectorAll('.message-wrapper');
+    let count = 0;
+    items.forEach(w => {
+      const text = w.querySelector('.message-bubble')?.textContent?.toLowerCase() || '';
+      const match = !searchQuery || text.includes(searchQuery);
+      w.style.display = match ? '' : 'none';
+      if (match && searchQuery) count++;
+    });
+    searchMessagesCount.textContent = searchQuery ? `Найдено: ${count}` : '';
+  }
+
   function sendMessage() {
     if (editingMessage) { saveEdit(); return; }
-
     const text = messageInput.value.trim();
     if (!text || !currentContactId || !socket) return;
 
@@ -2007,19 +2588,30 @@
       from: currentUser.id,
       to: currentContactId,
       text: text,
-      tempId: tempId
+      tempId: tempId,
+      replyTo: replyingTo ? replyingTo.id : null
     };
 
     addMessage({
       text: text,
       from_user: currentUser.id,
       timestamp: new Date(),
-      tempId: tempId
+      tempId: tempId,
+      reply_to: replyingTo ? replyingTo.id : null,
+      reply_text: replyingTo ? replyingTo.text : null,
+      reply_from: replyingTo ? replyingTo.from_user : null
     }, 'my');
 
     socket.emit('message', data);
+
+    if (isTyping) {
+      socket.emit('stop-typing', { from: currentUser.id, to: currentContactId });
+      isTyping = false;
+    }
+
     messageInput.value = '';
     messageInput.focus();
+    cancelReply();
   }
 
   function clearChat() {
@@ -2030,6 +2622,8 @@
     chatAvatar.innerHTML = '?';
     messageInput.disabled = true;
     sendBtn.disabled = true;
+    searchMsgBtn.style.display = 'none';
+    typingIndicator.classList.remove('show');
   }
 
   function attachFile() { fileInput.click(); }
@@ -2037,10 +2631,13 @@
   function uploadFile(event) {
     const files = event.target.files;
     if (!files.length || !currentContactId) return;
+    for (const file of files) sendFileFromBlob(file, file.name);
+    fileInput.value = '';
+  }
 
+  function sendFileFromBlob(file, name) {
     const formData = new FormData();
-    for (const file of files) formData.append('file', file);
-
+    formData.append('file', file, name);
     const tempId = 'temp_' + (++messageCounter) + '_' + Date.now();
     pendingMessages.add(tempId);
 
@@ -2052,20 +2649,22 @@
           to: currentContactId,
           text: '',
           file: data.filename,
-          tempId: tempId
+          tempId: tempId,
+          replyTo: replyingTo ? replyingTo.id : null
         };
-
         addMessage({
           from_user: currentUser.id,
           to_user: currentContactId,
           text: '',
           file: data.filename,
           timestamp: new Date(),
-          tempId: tempId
+          tempId: tempId,
+          reply_to: replyingTo ? replyingTo.id : null,
+          reply_text: replyingTo ? replyingTo.text : null,
+          reply_from: replyingTo ? replyingTo.from_user : null
         }, 'my');
-
         socket.emit('message', msgData);
-        fileInput.value = '';
+        cancelReply();
       })
       .catch(err => console.error('Ошибка загрузки файла:', err));
   }
@@ -2106,7 +2705,6 @@
     if (!currentContactId) return;
     const formData = new FormData();
     formData.append('file', blob, `voice_${Date.now()}.wav`);
-
     const tempId = 'temp_' + (++messageCounter) + '_' + Date.now();
     pendingMessages.add(tempId);
 
@@ -2118,19 +2716,22 @@
           to: currentContactId,
           text: '',
           voice: data.filename,
-          tempId: tempId
+          tempId: tempId,
+          replyTo: replyingTo ? replyingTo.id : null
         };
-
         addMessage({
           from_user: currentUser.id,
           to_user: currentContactId,
           text: '',
           voice: data.filename,
           timestamp: new Date(),
-          tempId: tempId
+          tempId: tempId,
+          reply_to: replyingTo ? replyingTo.id : null,
+          reply_text: replyingTo ? '🎤 Голосовое' : null,
+          reply_from: replyingTo ? replyingTo.from_user : null
         }, 'my');
-
         socket.emit('message', msgData);
+        cancelReply();
       })
       .catch(err => console.error('Ошибка отправки голоса:', err));
   }
@@ -2146,7 +2747,17 @@
     messagesArea.scrollTop = messagesArea.scrollHeight;
   }
 
-  console.log('✅ ITHub Messenger v11.0 (Онлайн-статусы) загружен');
+  console.log('✅ ITHub Messenger v16.0 (Логотип с прозрачными квадратами) загружен');
+</script>
+<script>
+  // ===== РЕГИСТРАЦИЯ SERVICE WORKER (PWA) =====
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then((reg) => console.log('✅ Service Worker зарегистрирован'))
+        .catch((err) => console.error('❌ Ошибка SW:', err));
+    });
+  }
 </script>
 </body>
 </html>

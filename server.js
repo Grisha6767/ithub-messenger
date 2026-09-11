@@ -1,16 +1,16 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const sqlite3 = require('sqlite3').verbose();
+const bcrypt = require('bcryptjs');
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // ===== СТАТИКА =====
 app.use(express.static('public'));
@@ -26,7 +26,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Отдельный multer для аватарок
 const avatarStorage = multer.diskStorage({
   destination: './uploads/',
   filename: (req, file, cb) => {
@@ -50,11 +49,13 @@ db.serialize(() => {
     file TEXT,
     voice TEXT,
     edited INTEGER DEFAULT 0,
+    read INTEGER DEFAULT 0,
+    reply_to INTEGER DEFAULT NULL,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 });
 
-// ===== ФУНКЦИИ ДЛЯ WHITELIST =====
+// ===== ФУНКЦИИ WHITELIST =====
 function readWhitelist() {
   return JSON.parse(fs.readFileSync('./whitelist.json', 'utf8'));
 }
@@ -63,18 +64,39 @@ function saveWhitelist(data) {
   fs.writeFileSync('./whitelist.json', JSON.stringify(data, null, 2), 'utf8');
 }
 
-// ===== АВТОРИЗАЦИЯ =====
+// ===== АВТОРИЗАЦИЯ (с bcrypt) =====
 app.post('/login', (req, res) => {
   const { login, password } = req.body;
   const whitelist = readWhitelist();
-  const user = whitelist.users.find(u => u.login === login && u.password === password);
+  const user = whitelist.users.find(u => u.login === login);
 
-  if (user) {
-    const { password, ...userWithoutPass } = user;
-    res.json({ success: true, user: userWithoutPass });
-  } else {
-    res.status(401).json({ success: false, error: 'Неверный логин или пароль' });
+  if (!user) {
+    return res.status(401).json({ success: false, error: 'Неверный логин или пароль' });
   }
+
+  // Проверка пароля: поддержка и хеша, и старого текстового
+  let passwordOk = false;
+  if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$')) {
+    passwordOk = bcrypt.compareSync(password, user.password);
+  } else {
+    // На случай, если ещё старый текстовый — при успехе перехешируем
+    passwordOk = user.password === password;
+    if (passwordOk) {
+      user.password = bcrypt.hashSync(password, 10);
+      saveWhitelist(whitelist);
+    }
+  }
+
+  if (!passwordOk) {
+    return res.status(401).json({ success: false, error: 'Неверный логин или пароль' });
+  }
+
+  // Обновляем lastSeen
+  user.lastSeen = new Date().toISOString();
+  saveWhitelist(whitelist);
+
+  const { password: _, ...userWithoutPass } = user;
+  res.json({ success: true, user: userWithoutPass });
 });
 
 // ===== КОНТАКТЫ =====
@@ -96,18 +118,20 @@ app.get('/contacts', (req, res) => {
     );
   }
 
-  // Убираем пароли
   contacts = contacts.map(({ password, ...rest }) => rest);
-
   res.json(contacts);
 });
 
 // ===== ИСТОРИЯ СООБЩЕНИЙ =====
 app.get('/messages', (req, res) => {
   const { from, to } = req.query;
+
   db.all(
-    `SELECT * FROM messages WHERE 
-     (from_user = ? AND to_user = ?) OR (from_user = ? AND to_user = ?)
+    `SELECT m.*, 
+       (SELECT text FROM messages WHERE id = m.reply_to) AS reply_text,
+       (SELECT from_user FROM messages WHERE id = m.reply_to) AS reply_from
+     FROM messages m
+     WHERE (from_user = ? AND to_user = ?) OR (from_user = ? AND to_user = ?)
      ORDER BY timestamp ASC`,
     [from, to, to, from],
     (err, rows) => {
@@ -121,13 +145,24 @@ app.get('/messages', (req, res) => {
   );
 });
 
-// ===== ИЗМЕНЕНИЕ СООБЩЕНИЯ =====
+// ===== ОТМЕТИТЬ КАК ПРОЧИТАННЫЕ =====
+app.post('/mark-read', (req, res) => {
+  const { from, to } = req.body;
+  db.run(
+    `UPDATE messages SET read = 1 WHERE from_user = ? AND to_user = ?`,
+    [from, to],
+    function(err) {
+      if (err) return res.status(500).json({ success: false });
+      io.to(`user_${from}`).emit('messages-read', { by: to });
+      res.json({ success: true });
+    }
+  );
+});
+
+// ===== ИЗМЕНЕНИЕ =====
 app.post('/edit-message', (req, res) => {
   const { id, text, from } = req.body;
-
-  if (!id || !text) {
-    return res.status(400).json({ success: false, error: 'Не хватает данных' });
-  }
+  if (!id || !text) return res.status(400).json({ success: false, error: 'Не хватает данных' });
 
   db.get(`SELECT * FROM messages WHERE id = ?`, [id], (err, row) => {
     if (err) return res.status(500).json({ success: false, error: err.message });
@@ -139,20 +174,17 @@ app.post('/edit-message', (req, res) => {
       [text, id],
       function(err) {
         if (err) return res.status(500).json({ success: false, error: err.message });
-
         io.to(`user_${row.to_user}`).emit('message-edited', { id, text });
         io.to(`user_${row.from_user}`).emit('message-edited', { id, text });
-
         res.json({ success: true });
       }
     );
   });
 });
 
-// ===== УДАЛЕНИЕ СООБЩЕНИЯ =====
+// ===== УДАЛЕНИЕ =====
 app.post('/delete-message', (req, res) => {
   const { id, from } = req.body;
-
   if (!id) return res.status(400).json({ success: false, error: 'Не хватает данных' });
 
   db.get(`SELECT * FROM messages WHERE id = ?`, [id], (err, row) => {
@@ -162,10 +194,8 @@ app.post('/delete-message', (req, res) => {
 
     db.run(`DELETE FROM messages WHERE id = ?`, [id], function(err) {
       if (err) return res.status(500).json({ success: false, error: err.message });
-
       io.to(`user_${row.to_user}`).emit('message-deleted', { id });
       io.to(`user_${row.from_user}`).emit('message-deleted', { id });
-
       res.json({ success: true });
     });
   });
@@ -176,13 +206,11 @@ app.post('/upload', upload.single('file'), (req, res) => {
   res.json({ filename: req.file.filename });
 });
 
-// ===== ЗАГРУЗКА АВАТАРКИ =====
+// ===== АВАТАРКА =====
 app.post('/upload-avatar', uploadAvatar.single('avatar'), (req, res) => {
   if (!req.file) return res.status(400).json({ success: false });
-
   const { filename } = req.file;
   const userId = parseInt(req.body.userId);
-
   const data = readWhitelist();
   const user = data.users.find(u => u.id === userId);
 
@@ -192,53 +220,106 @@ app.post('/upload-avatar', uploadAvatar.single('avatar'), (req, res) => {
     io.emit('avatar-updated', { userId, avatar: filename });
     res.json({ success: true, filename });
   } else {
-    res.status(404).json({ success: false, error: 'Пользователь не найден' });
+    res.status(404).json({ success: false });
   }
 });
 
-// ===== СМЕНА ПАРОЛЯ =====
+// ===== СМЕНА ПАРОЛЯ (с bcrypt) =====
 app.post('/change-password', (req, res) => {
   const { userId, oldPassword, newPassword } = req.body;
-
   if (!userId || !oldPassword || !newPassword) {
     return res.status(400).json({ success: false, error: 'Не хватает данных' });
   }
 
   const data = readWhitelist();
   const user = data.users.find(u => u.id === userId);
-
   if (!user) return res.status(404).json({ success: false, error: 'Пользователь не найден' });
-  if (user.password !== oldPassword) return res.status(403).json({ success: false, error: 'Неверный текущий пароль' });
+
+  let oldOk = false;
+  if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$')) {
+    oldOk = bcrypt.compareSync(oldPassword, user.password);
+  } else {
+    oldOk = user.password === oldPassword;
+  }
+
+  if (!oldOk) return res.status(403).json({ success: false, error: 'Неверный текущий пароль' });
   if (newPassword.length < 4) return res.status(400).json({ success: false, error: 'Пароль слишком короткий' });
 
-  user.password = newPassword;
+  user.password = bcrypt.hashSync(newPassword, 10);
   saveWhitelist(data);
-
   res.json({ success: true });
 });
 
-// ===== WEBSOCKET + ОТСЛЕЖИВАНИЕ ОНЛАЙНА =====
-const onlineUsers = new Map(); // userId -> socket.id
+// ===== WEBSOCKET =====
+const onlineUsers = new Map(); // userId -> { sockets: Set, status: 'online'|'away', lastSeen: Date }
+const awayTimers = new Map();  // userId -> timeoutId
+const offlineTimers = new Map(); // userId -> timeoutId
+
+function broadcastOnlineUsers() {
+  const list = [];
+  onlineUsers.forEach((data, userId) => {
+    list.push({
+      id: userId,
+      status: data.status,
+      lastSeen: data.lastSeen
+    });
+  });
+  io.emit('online-users', list);
+}
 
 io.on('connection', (socket) => {
-  console.log('Новый пользователь подключился');
+  console.log('Подключение:', socket.id);
 
   socket.on('join', (userId) => {
     socket.join(`user_${userId}`);
     socket.userId = userId;
-    onlineUsers.set(userId, socket.id);
-    console.log(`Пользователь ${userId} присоединился`);
 
-    // Рассылаем всем обновлённый список онлайн
-    io.emit('online-users', Array.from(onlineUsers.keys()));
+    if (!onlineUsers.has(userId)) {
+      onlineUsers.set(userId, { sockets: new Set(), status: 'online', lastSeen: new Date() });
+    }
+    onlineUsers.get(userId).sockets.add(socket.id);
+    onlineUsers.get(userId).status = 'online';
+
+    // Сбрасываем таймеры «отошёл» и «офлайн»
+    if (awayTimers.has(userId)) { clearTimeout(awayTimers.get(userId)); awayTimers.delete(userId); }
+    if (offlineTimers.has(userId)) { clearTimeout(offlineTimers.get(userId)); offlineTimers.delete(userId); }
+
+    broadcastOnlineUsers();
+    console.log(`Пользователь ${userId} в сети`);
+  });
+
+  // Клиент сообщает, что отошёл (свернул вкладку)
+  socket.on('away', (userId) => {
+    if (onlineUsers.has(userId)) {
+      onlineUsers.get(userId).status = 'away';
+      broadcastOnlineUsers();
+    }
+  });
+
+  socket.on('back', (userId) => {
+    if (onlineUsers.has(userId)) {
+      onlineUsers.get(userId).status = 'online';
+      broadcastOnlineUsers();
+    }
+  });
+
+  // Клиент печатает
+  socket.on('typing', (data) => {
+    const { from, to } = data;
+    io.to(`user_${to}`).emit('user-typing', { from });
+  });
+
+  socket.on('stop-typing', (data) => {
+    const { from, to } = data;
+    io.to(`user_${to}`).emit('user-stop-typing', { from });
   });
 
   socket.on('message', (data) => {
-    const { from, to, text, file, voice, tempId } = data;
+    const { from, to, text, file, voice, tempId, replyTo } = data;
 
     db.run(
-      `INSERT INTO messages (from_user, to_user, text, file, voice) VALUES (?, ?, ?, ?, ?)`,
-      [from, to, text || null, file || null, voice || null],
+      `INSERT INTO messages (from_user, to_user, text, file, voice, reply_to) VALUES (?, ?, ?, ?, ?, ?)`,
+      [from, to, text || null, file || null, voice || null, replyTo || null],
       function(err) {
         if (err) {
           console.error('Ошибка сохранения:', err);
@@ -250,6 +331,8 @@ io.on('connection', (socket) => {
             text: text || '',
             file: file || null,
             voice: voice || null,
+            reply_to: replyTo || null,
+            read: 0,
             tempId: tempId || null,
             timestamp: new Date()
           };
@@ -261,10 +344,29 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    if (socket.userId) {
-      onlineUsers.delete(socket.userId);
-      console.log(`Пользователь ${socket.userId} отключился`);
-      io.emit('online-users', Array.from(onlineUsers.keys()));
+    const userId = socket.userId;
+    if (!userId) return;
+
+    const data = onlineUsers.get(userId);
+    if (data) {
+      data.sockets.delete(socket.id);
+
+      if (data.sockets.size === 0) {
+        // Сразу помечаем «отошёл»
+        data.status = 'away';
+        data.lastSeen = new Date();
+        broadcastOnlineUsers();
+
+        // Через 2 минуты — «не в сети»
+        const t = setTimeout(() => {
+          onlineUsers.delete(userId);
+          awayTimers.delete(userId);
+          offlineTimers.delete(userId);
+          broadcastOnlineUsers();
+          console.log(`Пользователь ${userId} ушёл в офлайн`);
+        }, 2 * 60 * 1000);
+        offlineTimers.set(userId, t);
+      }
     }
   });
 });

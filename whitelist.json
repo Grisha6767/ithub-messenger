@@ -3,7 +3,7 @@
     {
       "id": 1,
       "login": "111",
-      "password": "1111",
+      "password": "$2a$10$wijo2yPIjpddzpEnxDGQUOd4hPEHU7QGHGxfIYVMkL6/HZLT7p2sK",
       "role": "teacher",
       "fullName": "Анна Петрова",
       "groups": [
@@ -16,12 +16,13 @@
         "Web-разработка",
         "Базы данных"
       ],
-      "avatar": "avatar_1789065442756_photo_2026-08-20_22-13-47.jpg"
+      "avatar": null,
+      "lastSeen": "2026-09-11T14:33:03.165Z"
     },
     {
       "id": 2,
       "login": "teacher2@ithub.ru",
-      "password": "pass123",
+      "password": "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
       "role": "teacher",
       "fullName": "Иван Смирнов",
       "groups": [
@@ -32,12 +33,13 @@
         "Алгоритмы",
         "Python"
       ],
-      "avatar": null
+      "avatar": null,
+      "lastSeen": null
     },
     {
       "id": 3,
       "login": "teacher3@ithub.ru",
-      "password": "pass123",
+      "password": "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
       "role": "teacher",
       "fullName": "Мария Козлова",
       "groups": [
@@ -48,61 +50,68 @@
         "Дизайн",
         "UX/UI"
       ],
-      "avatar": null
+      "avatar": null,
+      "lastSeen": null
     },
     {
       "id": 4,
       "login": "student1@ithub.ru",
-      "password": "pass123",
+      "password": "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
       "role": "student",
       "fullName": "Дмитрий Иванов",
       "group": "1ПР",
-      "avatar": null
+      "avatar": null,
+      "lastSeen": null
     },
     {
       "id": 5,
       "login": "student2@ithub.ru",
-      "password": "pass123",
+      "password": "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
       "role": "student",
       "fullName": "Елена Соколова",
       "group": "1ПР",
-      "avatar": null
+      "avatar": null,
+      "lastSeen": null
     },
     {
       "id": 6,
       "login": "student3@ithub.ru",
-      "password": "pass123",
+      "password": "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
       "role": "student",
       "fullName": "Алексей Фёдоров",
       "group": "1Д",
-      "avatar": null
+      "avatar": null,
+      "lastSeen": null
     },
     {
       "id": 7,
       "login": "student4@ithub.ru",
-      "password": "pass123",
+      "password": "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
       "role": "student",
       "fullName": "Ольга Морозова",
       "group": "1РИ",
-      "avatar": null
+      "avatar": null,
+      "lastSeen": null
     },
     {
       "id": 8,
       "login": "student5@ithub.ru",
-      "password": "pass123",
+      "password": "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
       "role": "student",
       "fullName": "Павел Новиков",
       "group": "1ВР",
-      "avatar": null
+      "avatar": null,
+      "lastSeen": null
     },
     {
       "id": 9,
       "login": "student6@ithub.ru",
-      "password": "pass123",
+      "password": "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
       "role": "student",
       "fullName": "Мария Волкова",
       "group": "1ПР",
-      "avatar": null
+      "avatar": null,
+      "lastSeen": null
     }
   ]
 }
