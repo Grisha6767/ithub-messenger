@@ -1,16 +1,25 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
+const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const sqlite3 = require('sqlite3').verbose();
-const bcrypt = require('bcryptjs');
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
 const PORT = process.env.PORT || 3000;
+
+// ===== CORS для мобильных =====
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
 
 // ===== СТАТИКА =====
 app.use(express.static('public'));
@@ -21,18 +30,27 @@ app.use('/uploads', express.static('uploads'));
 const storage = multer.diskStorage({
   destination: './uploads/',
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
+    const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+    cb(null, Date.now() + '-' + safeName);
   }
 });
-const upload = multer({ storage });
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 50 * 1024 * 1024 }
+});
 
+// ===== ЗАГРУЗКА АВАТАРОК =====
 const avatarStorage = multer.diskStorage({
   destination: './uploads/',
   filename: (req, file, cb) => {
-    cb(null, 'avatar_' + Date.now() + '_' + file.originalname);
+    const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+    cb(null, 'avatar_' + Date.now() + '_' + safeName);
   }
 });
-const uploadAvatar = multer({ storage: avatarStorage });
+const uploadAvatar = multer({ 
+  storage: avatarStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }
+});
 
 // ===== БАЗА ДАННЫХ =====
 const db = new sqlite3.Database('database.db', (err) => {
@@ -55,7 +73,7 @@ db.serialize(() => {
   )`);
 });
 
-// ===== ФУНКЦИИ WHITELIST =====
+// ===== WHITELIST =====
 function readWhitelist() {
   return JSON.parse(fs.readFileSync('./whitelist.json', 'utf8'));
 }
@@ -64,7 +82,7 @@ function saveWhitelist(data) {
   fs.writeFileSync('./whitelist.json', JSON.stringify(data, null, 2), 'utf8');
 }
 
-// ===== АВТОРИЗАЦИЯ (с bcrypt) =====
+// ===== АВТОРИЗАЦИЯ =====
 app.post('/login', (req, res) => {
   const { login, password } = req.body;
   const whitelist = readWhitelist();
@@ -74,20 +92,8 @@ app.post('/login', (req, res) => {
     return res.status(401).json({ success: false, error: 'Неверный логин или пароль' });
   }
 
-  // Проверка пароля: поддержка и хеша, и старого текстового
-  let passwordOk = false;
-  if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$')) {
-    passwordOk = bcrypt.compareSync(password, user.password);
-  } else {
-    // На случай, если ещё старый текстовый — при успехе перехешируем
-    passwordOk = user.password === password;
-    if (passwordOk) {
-      user.password = bcrypt.hashSync(password, 10);
-      saveWhitelist(whitelist);
-    }
-  }
-
-  if (!passwordOk) {
+  // Простое сравнение пароля (без bcrypt для простоты)
+  if (user.password !== password) {
     return res.status(401).json({ success: false, error: 'Неверный логин или пароль' });
   }
 
@@ -159,7 +165,7 @@ app.post('/mark-read', (req, res) => {
   );
 });
 
-// ===== ИЗМЕНЕНИЕ =====
+// ===== ИЗМЕНЕНИЕ СООБЩЕНИЯ =====
 app.post('/edit-message', (req, res) => {
   const { id, text, from } = req.body;
   if (!id || !text) return res.status(400).json({ success: false, error: 'Не хватает данных' });
@@ -182,7 +188,7 @@ app.post('/edit-message', (req, res) => {
   });
 });
 
-// ===== УДАЛЕНИЕ =====
+// ===== УДАЛЕНИЕ СООБЩЕНИЯ =====
 app.post('/delete-message', (req, res) => {
   const { id, from } = req.body;
   if (!id) return res.status(400).json({ success: false, error: 'Не хватает данных' });
@@ -203,14 +209,28 @@ app.post('/delete-message', (req, res) => {
 
 // ===== ЗАГРУЗКА ФАЙЛОВ =====
 app.post('/upload', upload.single('file'), (req, res) => {
-  res.json({ filename: req.file.filename });
+  if (!req.file) return res.status(400).json({ success: false, error: 'Файл не получен' });
+  console.log('Загружен файл:', req.file.filename, req.file.size, 'байт');
+  res.json({ success: true, filename: req.file.filename });
 });
 
 // ===== АВАТАРКА =====
 app.post('/upload-avatar', uploadAvatar.single('avatar'), (req, res) => {
-  if (!req.file) return res.status(400).json({ success: false });
+  console.log('=== Загрузка аватарки ===');
+  console.log('File:', req.file ? req.file.filename : 'НЕТ');
+  console.log('Body:', req.body);
+
+  if (!req.file) {
+    return res.status(400).json({ success: false, error: 'Файл не получен' });
+  }
+
   const { filename } = req.file;
   const userId = parseInt(req.body.userId);
+
+  if (!userId) {
+    return res.status(400).json({ success: false, error: 'userId не передан' });
+  }
+
   const data = readWhitelist();
   const user = data.users.find(u => u.id === userId);
 
@@ -220,11 +240,11 @@ app.post('/upload-avatar', uploadAvatar.single('avatar'), (req, res) => {
     io.emit('avatar-updated', { userId, avatar: filename });
     res.json({ success: true, filename });
   } else {
-    res.status(404).json({ success: false });
+    res.status(404).json({ success: false, error: 'Пользователь не найден' });
   }
 });
 
-// ===== СМЕНА ПАРОЛЯ (с bcrypt) =====
+// ===== СМЕНА ПАРОЛЯ =====
 app.post('/change-password', (req, res) => {
   const { userId, oldPassword, newPassword } = req.body;
   if (!userId || !oldPassword || !newPassword) {
@@ -234,26 +254,17 @@ app.post('/change-password', (req, res) => {
   const data = readWhitelist();
   const user = data.users.find(u => u.id === userId);
   if (!user) return res.status(404).json({ success: false, error: 'Пользователь не найден' });
-
-  let oldOk = false;
-  if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$')) {
-    oldOk = bcrypt.compareSync(oldPassword, user.password);
-  } else {
-    oldOk = user.password === oldPassword;
-  }
-
-  if (!oldOk) return res.status(403).json({ success: false, error: 'Неверный текущий пароль' });
+  if (user.password !== oldPassword) return res.status(403).json({ success: false, error: 'Неверный текущий пароль' });
   if (newPassword.length < 4) return res.status(400).json({ success: false, error: 'Пароль слишком короткий' });
 
-  user.password = bcrypt.hashSync(newPassword, 10);
+  user.password = newPassword;
   saveWhitelist(data);
   res.json({ success: true });
 });
 
 // ===== WEBSOCKET =====
-const onlineUsers = new Map(); // userId -> { sockets: Set, status: 'online'|'away', lastSeen: Date }
-const awayTimers = new Map();  // userId -> timeoutId
-const offlineTimers = new Map(); // userId -> timeoutId
+const onlineUsers = new Map();
+const offlineTimers = new Map();
 
 function broadcastOnlineUsers() {
   const list = [];
@@ -280,15 +291,15 @@ io.on('connection', (socket) => {
     onlineUsers.get(userId).sockets.add(socket.id);
     onlineUsers.get(userId).status = 'online';
 
-    // Сбрасываем таймеры «отошёл» и «офлайн»
-    if (awayTimers.has(userId)) { clearTimeout(awayTimers.get(userId)); awayTimers.delete(userId); }
-    if (offlineTimers.has(userId)) { clearTimeout(offlineTimers.get(userId)); offlineTimers.delete(userId); }
+    if (offlineTimers.has(userId)) {
+      clearTimeout(offlineTimers.get(userId));
+      offlineTimers.delete(userId);
+    }
 
     broadcastOnlineUsers();
     console.log(`Пользователь ${userId} в сети`);
   });
 
-  // Клиент сообщает, что отошёл (свернул вкладку)
   socket.on('away', (userId) => {
     if (onlineUsers.has(userId)) {
       onlineUsers.get(userId).status = 'away';
@@ -303,7 +314,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Клиент печатает
   socket.on('typing', (data) => {
     const { from, to } = data;
     io.to(`user_${to}`).emit('user-typing', { from });
@@ -312,6 +322,19 @@ io.on('connection', (socket) => {
   socket.on('stop-typing', (data) => {
     const { from, to } = data;
     io.to(`user_${to}`).emit('user-stop-typing', { from });
+  });
+
+  socket.on('mark-read', (data) => {
+    const { from, to } = data;
+    db.run(
+      `UPDATE messages SET read = 1 WHERE from_user = ? AND to_user = ?`,
+      [from, to],
+      function(err) {
+        if (!err) {
+          io.to(`user_${from}`).emit('messages-read', { by: to });
+        }
+      }
+    );
   });
 
   socket.on('message', (data) => {
@@ -352,15 +375,12 @@ io.on('connection', (socket) => {
       data.sockets.delete(socket.id);
 
       if (data.sockets.size === 0) {
-        // Сразу помечаем «отошёл»
         data.status = 'away';
         data.lastSeen = new Date();
         broadcastOnlineUsers();
 
-        // Через 2 минуты — «не в сети»
         const t = setTimeout(() => {
           onlineUsers.delete(userId);
-          awayTimers.delete(userId);
           offlineTimers.delete(userId);
           broadcastOnlineUsers();
           console.log(`Пользователь ${userId} ушёл в офлайн`);
