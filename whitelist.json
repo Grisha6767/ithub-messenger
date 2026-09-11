@@ -3,7 +3,7 @@
     {
       "id": 1,
       "login": "111",
-      "password": "$2a$10$wijo2yPIjpddzpEnxDGQUOd4hPEHU7QGHGxfIYVMkL6/HZLT7p2sK",
+      "password": "111",
       "role": "teacher",
       "fullName": "Анна Петрова",
       "groups": [
