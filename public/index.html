@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#7C5CFC">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
   <title>ITHub Мессенджер</title>
   <link rel="manifest" href="/manifest.json">
@@ -31,8 +30,6 @@
       --away: #FBBF24;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --safe-left: env(safe-area-inset-left, 0px);
-      --safe-right: env(safe-area-inset-right, 0px);
     }
 
     body.dark {
@@ -79,7 +76,6 @@
       width: 100vw;
       background: var(--bg-primary);
       overflow: hidden;
-      transition: background 0.3s;
     }
 
     @keyframes fadeIn {
@@ -100,8 +96,6 @@
     .message-wrapper {
       animation: messageIn 0.25s ease;
       -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
       user-select: none;
       -webkit-touch-callout: none;
     }
@@ -122,7 +116,6 @@
       padding: 20px;
       padding-top: calc(20px + var(--safe-top));
       padding-bottom: calc(20px + var(--safe-bottom));
-      animation: fadeIn 0.4s ease;
     }
 
     .login-card {
@@ -134,7 +127,6 @@
       width: 100%;
       text-align: center;
       border: 1px solid var(--border);
-      animation: popIn 0.3s ease;
     }
 
     .login-card h1 { font-size: 32px; color: var(--text-primary); margin-bottom: 8px; }
@@ -149,7 +141,6 @@
       background: var(--bg-input);
       color: var(--text-primary);
       font-size: 16px;
-      transition: border 0.2s, background 0.3s;
     }
 
     .login-card input:focus { outline: none; border-color: var(--accent); }
@@ -165,7 +156,6 @@
       font-weight: 600;
       cursor: pointer;
       margin-top: 12px;
-      transition: background 0.2s, transform 0.1s;
       font-family: inherit;
     }
 
@@ -174,7 +164,7 @@
     .login-card .forgot { color: var(--text-secondary); font-size: 14px; text-decoration: none; margin-top: 16px; display: inline-block; }
     .login-card .error-text { color: var(--accent); font-size: 14px; margin-top: 10px; min-height: 20px; }
 
-    .messenger { display: none; width: 100%; height: 100%; flex: 1; animation: fadeIn 0.3s ease; }
+    .messenger { display: none; width: 100%; height: 100%; flex: 1; }
 
     .sidebar {
       width: 340px;
@@ -186,7 +176,6 @@
       height: 100%;
       overflow: hidden;
       flex-shrink: 0;
-      transition: background 0.3s;
     }
 
     .sidebar-header {
@@ -201,11 +190,7 @@
       gap: 6px;
     }
 
-    .ithub-logo {
-      width: auto;
-      height: 42px;
-      display: block;
-    }
+    .ithub-logo { width: auto; height: 42px; display: block; }
 
     .sidebar-header-info {
       font-size: 12px;
@@ -241,19 +226,10 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      transition: background 0.2s;
-    }
-
-    .mobile-menu-btn:active,
-    .mobile-back-btn:active {
-      background: var(--bg-hover);
     }
 
     .mobile-menu-btn svg,
-    .mobile-back-btn svg {
-      width: 22px;
-      height: 22px;
-    }
+    .mobile-back-btn svg { width: 22px; height: 22px; }
 
     .group-filter {
       display: flex;
@@ -273,12 +249,10 @@
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
       font-family: inherit;
       white-space: nowrap;
     }
 
-    .group-btn:hover { border-color: var(--accent); color: var(--accent); }
     .group-btn.active { background: var(--accent); color: #FFFFFF; border-color: var(--accent); }
 
     .search-box { padding: 12px 16px 10px; background: var(--bg-secondary); flex-shrink: 0; }
@@ -291,7 +265,6 @@
       background: var(--bg-primary);
       color: var(--text-primary);
       font-size: 16px;
-      transition: border 0.2s, background 0.3s;
     }
 
     .search-box input:focus { outline: none; border-color: var(--accent); }
@@ -320,7 +293,6 @@
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
       font-family: inherit;
       display: flex;
       align-items: center;
@@ -328,34 +300,19 @@
       gap: 6px;
     }
 
-    .sidebar-footer-btn:hover {
-      background: var(--bg-hover);
-      border-color: var(--accent);
-    }
-
-    .sidebar-footer-btn:active {
-      transform: scale(0.98);
-    }
-
-    .sidebar-footer-btn svg {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-    }
+    .sidebar-footer-btn:active { transform: scale(0.98); }
+    .sidebar-footer-btn svg { width: 16px; height: 16px; }
 
     .contact-item {
       display: flex;
       align-items: center;
       padding: 12px 20px;
       cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
       border-left: 3px solid transparent;
       position: relative;
-      -webkit-tap-highlight-color: transparent;
     }
 
-    .contact-item:hover { background: var(--bg-hover); }
-    .contact-item:active { transform: scale(0.99); background: var(--bg-hover); }
+    .contact-item:active { background: var(--bg-hover); }
     .contact-item.active { background: var(--bg-hover); border-left-color: var(--accent); }
 
     .avatar {
@@ -397,7 +354,6 @@
       border: 3px solid var(--bg-secondary);
       box-shadow: 0 0 0 1px var(--border);
       z-index: 2;
-      transition: background 0.3s;
     }
 
     .avatar .online-dot.online { background: var(--online); }
@@ -423,7 +379,6 @@
       background: var(--bg-primary);
       height: 100%;
       min-width: 0;
-      transition: background 0.3s;
     }
 
     .chat-header {
@@ -445,17 +400,13 @@
       font-size: 17px;
       margin-right: 14px;
       cursor: pointer;
-      transition: transform 0.15s;
     }
 
-    .chat-header .avatar:hover { transform: scale(1.08); }
-
     .chat-header .chat-contact-name { font-size: 18px; font-weight: 600; color: var(--text-primary); }
-    .chat-header .chat-contact-status { font-size: 14px; color: var(--accent); transition: color 0.2s; }
+    .chat-header .chat-contact-status { font-size: 14px; color: var(--accent); }
 
     .chat-header-left .clickable-name {
       cursor: pointer;
-      transition: opacity 0.15s;
       min-width: 0;
       overflow: hidden;
     }
@@ -465,8 +416,6 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
-    .chat-header-left .clickable-name:hover { opacity: 0.75; }
 
     .chat-header-actions {
       display: flex;
@@ -481,7 +430,6 @@
       cursor: pointer;
       padding: 8px;
       border-radius: 50%;
-      transition: background 0.2s;
       color: var(--accent);
       width: 40px;
       height: 40px;
@@ -490,7 +438,6 @@
       justify-content: center;
     }
 
-    .header-action-btn:hover { background: var(--bg-hover); }
     .header-action-btn svg { width: 20px; height: 20px; }
 
     .messages-area {
@@ -500,7 +447,6 @@
       display: flex;
       flex-direction: column;
       background: var(--bg-primary);
-      transition: background 0.3s;
       -webkit-overflow-scrolling: touch;
     }
 
@@ -546,10 +492,8 @@
       font-size: 13px;
       background: rgba(124, 92, 252, 0.1);
       cursor: pointer;
-      transition: background 0.15s;
     }
 
-    .reply-quote:hover { background: rgba(124, 92, 252, 0.2); }
     .reply-quote .reply-author { font-weight: 600; color: var(--accent); display: block; font-size: 12px; }
     .reply-quote .reply-text { color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
 
@@ -585,12 +529,9 @@
       justify-content: center;
       flex-shrink: 0;
       color: inherit;
-      transition: background 0.2s;
     }
 
     .message-wrapper.other .voice-play-btn { background: rgba(124, 92, 252, 0.15); }
-    .voice-play-btn:hover { background: rgba(255, 255, 255, 0.4); }
-    .message-wrapper.other .voice-play-btn:hover { background: rgba(124, 92, 252, 0.25); }
     .voice-play-btn svg { width: 16px; height: 16px; fill: currentColor; }
 
     .voice-wave {
@@ -607,7 +548,6 @@
       background: currentColor;
       opacity: 0.4;
       border-radius: 2px;
-      transition: opacity 0.15s;
     }
 
     .voice-wave .bar.played { opacity: 0.9; }
@@ -630,7 +570,6 @@
       min-width: 160px;
       z-index: 5000;
       display: none;
-      animation: popIn 0.15s ease;
     }
 
     .context-menu.show { display: block; }
@@ -643,7 +582,6 @@
       align-items: center;
       gap: 10px;
       cursor: pointer;
-      transition: background 0.15s;
       border: none;
       background: none;
       width: 100%;
@@ -651,9 +589,8 @@
       font-family: inherit;
     }
 
-    .context-menu-item:hover { background: var(--bg-hover); }
+    .context-menu-item:active { background: var(--bg-hover); }
     .context-menu-item.danger { color: var(--danger); }
-    .context-menu-item.danger:hover { background: rgba(231, 76, 60, 0.1); }
     .context-menu-item svg { width: 18px; height: 18px; flex-shrink: 0; }
 
     .message-edited {
@@ -685,12 +622,6 @@
       border-radius: 10px;
       display: block;
       cursor: pointer;
-      transition: transform 0.15s, filter 0.15s;
-    }
-
-    .message-bubble img:hover {
-      transform: scale(1.02);
-      filter: brightness(1.05);
     }
 
     .message-bubble a { color: inherit; text-decoration: none; }
@@ -707,7 +638,6 @@
       align-items: center;
       justify-content: center;
       z-index: 9999;
-      animation: fadeIn 0.2s ease;
     }
 
     .image-viewer.show { display: flex; }
@@ -716,7 +646,6 @@
       max-width: 96%;
       max-height: 96%;
       border-radius: 8px;
-      animation: popIn 0.25s ease;
     }
 
     .image-viewer .close-viewer {
@@ -731,15 +660,6 @@
       color: #FFFFFF;
       font-size: 28px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
-      backdrop-filter: blur(6px);
-    }
-
-    .image-viewer .close-viewer:hover {
-      background: rgba(255, 255, 255, 0.3);
     }
 
     .image-viewer .download-btn {
@@ -753,21 +673,9 @@
       border-radius: 50%;
       color: #FFFFFF;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
-      backdrop-filter: blur(6px);
     }
 
-    .image-viewer .download-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
-
-    .image-viewer .download-btn svg {
-      width: 22px;
-      height: 22px;
-    }
+    .image-viewer .download-btn svg { width: 22px; height: 22px; }
 
     .typing-indicator {
       display: none;
@@ -811,25 +719,12 @@
       border-top: 1px solid var(--border);
       font-size: 14px;
       color: var(--text-primary);
-      animation: fadeIn 0.2s ease;
     }
 
     .edit-panel.show { display: flex; }
 
-    .edit-panel .edit-icon {
-      width: 20px;
-      height: 20px;
-      color: var(--accent);
-      flex-shrink: 0;
-    }
-
-    .edit-panel .edit-text {
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
+    .edit-panel .edit-icon { width: 20px; height: 20px; color: var(--accent); flex-shrink: 0; }
+    .edit-panel .edit-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .edit-panel .cancel-btn {
       background: none;
       border: none;
@@ -837,10 +732,7 @@
       color: var(--text-secondary);
       font-size: 22px;
       padding: 0 8px;
-      transition: color 0.2s;
     }
-
-    .edit-panel .cancel-btn:hover { color: var(--danger); }
 
     .input-area {
       display: flex;
@@ -851,7 +743,6 @@
       background: var(--bg-primary);
       gap: 8px;
       flex-shrink: 0;
-      transition: background 0.3s;
     }
 
     .input-area.editing, .input-area.replying { border-top-color: var(--accent); }
@@ -862,7 +753,6 @@
       cursor: pointer;
       padding: 8px;
       border-radius: 50%;
-      transition: background 0.2s;
       color: var(--accent);
       width: 44px;
       height: 44px;
@@ -872,8 +762,6 @@
       flex-shrink: 0;
     }
 
-    .input-area .btn-icon:hover { background: var(--bg-hover); }
-    .input-area .btn-icon:active { background: var(--bg-hover); }
     .input-area .btn-icon svg { width: 22px; height: 22px; }
 
     .input-area input {
@@ -884,7 +772,6 @@
       background: var(--bg-input);
       color: var(--text-primary);
       font-size: 16px;
-      transition: border 0.2s, background 0.3s;
       min-width: 0;
       font-family: inherit;
     }
@@ -900,7 +787,6 @@
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
       flex-shrink: 0;
       display: flex;
       align-items: center;
@@ -909,8 +795,6 @@
       font-family: inherit;
     }
 
-    .input-area .btn-send:hover { background: var(--accent-hover); }
-    .input-area .btn-send:active { transform: scale(0.97); }
     .input-area .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
     .input-area .btn-send svg { width: 18px; height: 18px; }
 
@@ -927,7 +811,6 @@
       align-items: center;
       justify-content: center;
       z-index: 2000;
-      animation: fadeIn 0.2s ease;
       padding: 20px;
       padding-top: calc(20px + var(--safe-top));
       padding-bottom: calc(20px + var(--safe-bottom));
@@ -943,7 +826,6 @@
       width: 100%;
       box-shadow: 0 20px 60px var(--shadow);
       border: 1px solid var(--border);
-      animation: popIn 0.25s ease;
       max-height: 90vh;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
@@ -964,12 +846,9 @@
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
       width: 100%;
       font-family: inherit;
     }
-
-    .modal .close-btn:hover { background: var(--accent-hover); }
 
     .profile-avatar-section {
       display: flex;
@@ -993,10 +872,7 @@
       position: relative;
       cursor: pointer;
       border: 3px solid var(--border);
-      transition: border-color 0.2s;
     }
-
-    .profile-avatar-big:hover { border-color: var(--accent); }
 
     .profile-avatar-big img {
       width: 100%;
@@ -1015,7 +891,6 @@
       padding: 4px 0;
       text-align: center;
       opacity: 0;
-      transition: opacity 0.2s;
     }
 
     .profile-avatar-big:hover .overlay { opacity: 1; }
@@ -1042,17 +917,11 @@
       font-size: 14px;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
       font-family: inherit;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-    }
-
-    .profile-action-btn:hover {
-      background: var(--bg-hover);
-      border-color: var(--accent);
     }
 
     .profile-action-btn svg { width: 16px; height: 16px; }
@@ -1067,11 +936,8 @@
       background: var(--bg-input);
       color: var(--text-primary);
       font-size: 16px;
-      transition: border 0.2s;
       font-family: inherit;
     }
-
-    .password-form input:focus { outline: none; border-color: var(--accent); }
 
     .password-form .save-btn {
       width: 100%;
@@ -1084,25 +950,11 @@
       font-weight: 600;
       cursor: pointer;
       margin-top: 6px;
-      transition: background 0.2s;
       font-family: inherit;
     }
 
-    .password-form .save-btn:hover { background: var(--accent-hover); }
-
-    .password-form .error-msg {
-      color: var(--danger);
-      font-size: 13px;
-      margin-top: 6px;
-      min-height: 18px;
-    }
-
-    .password-form .success-msg {
-      color: var(--accent);
-      font-size: 13px;
-      margin-top: 6px;
-      min-height: 18px;
-    }
+    .password-form .error-msg { color: var(--danger); font-size: 13px; margin-top: 6px; min-height: 18px; }
+    .password-form .success-msg { color: var(--accent); font-size: 13px; margin-top: 6px; min-height: 18px; }
 
     .settings-field {
       display: flex;
@@ -1124,7 +976,6 @@
       border-radius: 13px;
       cursor: pointer;
       position: relative;
-      transition: background 0.25s;
       flex-shrink: 0;
     }
 
@@ -1139,7 +990,6 @@
       top: 2px;
       left: 2px;
       transition: transform 0.25s;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
     }
 
     .toggle.active .knob { transform: translateX(22px); }
@@ -1151,7 +1001,6 @@
       padding: 10px 28px;
       background: var(--bg-secondary);
       border-bottom: 1px solid var(--border);
-      animation: fadeIn 0.2s ease;
     }
 
     .search-messages-panel.show { display: flex; }
@@ -1167,8 +1016,6 @@
       font-family: inherit;
     }
 
-    .search-messages-panel input:focus { outline: none; border-color: var(--accent); }
-
     .search-messages-panel .close-search {
       background: none;
       border: none;
@@ -1178,19 +1025,10 @@
       padding: 0 6px;
     }
 
-    .search-messages-panel .close-search:hover { color: var(--danger); }
-
     .search-messages-panel .search-count {
       font-size: 13px;
       color: var(--text-secondary);
       white-space: nowrap;
-    }
-
-    .message-wrapper.highlight { animation: highlight 1.5s ease; }
-
-    @keyframes highlight {
-      0%, 100% { background: transparent; }
-      50% { background: rgba(124, 92, 252, 0.15); }
     }
 
     .reply-panel {
@@ -1202,7 +1040,6 @@
       border-top: 1px solid var(--border);
       font-size: 14px;
       color: var(--text-primary);
-      animation: fadeIn 0.2s ease;
     }
 
     .reply-panel.show { display: flex; }
@@ -1215,17 +1052,8 @@
       flex-shrink: 0;
     }
 
-    .reply-panel .reply-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .reply-panel .reply-to-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--accent);
-    }
-
+    .reply-panel .reply-info { flex: 1; min-width: 0; }
+    .reply-panel .reply-to-name { font-size: 13px; font-weight: 600; color: var(--accent); }
     .reply-panel .reply-to-text {
       font-size: 13px;
       color: var(--text-secondary);
@@ -1241,10 +1069,7 @@
       color: var(--text-secondary);
       font-size: 22px;
       padding: 0 8px;
-      transition: color 0.2s;
     }
-
-    .reply-panel .cancel-btn:hover { color: var(--danger); }
 
     @media (max-width: 768px) {
       .sidebar {
@@ -1261,9 +1086,7 @@
         transition: transform 0.3s ease;
       }
 
-      .sidebar.hidden {
-        transform: translateX(-100%);
-      }
+      .sidebar.hidden { transform: translateX(-100%); }
 
       .chat-area {
         position: fixed;
@@ -1277,15 +1100,9 @@
         transition: transform 0.3s ease;
       }
 
-      .chat-area.visible {
-        transform: translateX(0);
-        z-index: 200;
-      }
+      .chat-area.visible { transform: translateX(0); z-index: 200; }
 
-      .mobile-menu-btn,
-      .mobile-back-btn {
-        display: flex;
-      }
+      .mobile-menu-btn, .mobile-back-btn { display: flex; }
 
       .chat-header {
         padding: 10px 12px;
@@ -1293,36 +1110,16 @@
         min-height: 56px;
       }
 
-      .chat-header .avatar {
-        width: 38px;
-        height: 38px;
-        font-size: 15px;
-        margin-right: 10px;
-      }
-
+      .chat-header .avatar { width: 38px; height: 38px; font-size: 15px; margin-right: 10px; }
       .chat-header .chat-contact-name { font-size: 16px; }
       .chat-header .chat-contact-status { font-size: 12px; }
 
-      .header-action-btn {
-        width: 36px;
-        height: 36px;
-        padding: 6px;
-      }
-
+      .header-action-btn { width: 36px; height: 36px; padding: 6px; }
       .header-action-btn svg { width: 18px; height: 18px; }
 
-      .messages-area {
-        padding: 12px 14px;
-      }
-
+      .messages-area { padding: 12px 14px; }
       .message-wrapper { max-width: 88%; }
-
-      .message-bubble {
-        font-size: 15px;
-        padding: 9px 14px;
-        border-radius: 16px;
-      }
-
+      .message-bubble { font-size: 15px; padding: 9px 14px; border-radius: 16px; }
       .message-bubble img { max-width: 200px; }
 
       .input-area {
@@ -1331,31 +1128,13 @@
         gap: 4px;
       }
 
-      .input-area input {
-        font-size: 16px;
-        padding: 10px 14px;
-        border-radius: 20px;
-      }
-
-      .input-area .btn-send {
-        padding: 10px 16px;
-        font-size: 14px;
-        border-radius: 20px;
-        height: 40px;
-      }
-
+      .input-area input { font-size: 16px; padding: 10px 14px; border-radius: 20px; }
+      .input-area .btn-send { padding: 10px 16px; font-size: 14px; border-radius: 20px; height: 40px; }
       .input-area .btn-send svg { width: 16px; height: 16px; }
-
-      .input-area .btn-icon {
-        width: 38px;
-        height: 38px;
-        padding: 6px;
-      }
-
+      .input-area .btn-icon { width: 38px; height: 38px; padding: 6px; }
       .input-area .btn-icon svg { width: 20px; height: 20px; }
 
       .avatar { width: 42px; height: 42px; font-size: 16px; }
-
       .contact-item { padding: 12px 16px; }
       .contact-name { font-size: 15px; }
       .contact-sub { font-size: 12px; }
@@ -1366,33 +1145,13 @@
       .search-box { padding: 10px 12px 8px; }
       .search-box input { padding: 9px 12px; font-size: 16px; }
 
-      .modal {
-        padding: 24px 20px;
-        width: 100%;
-        max-width: none;
-        border-radius: 14px;
-        max-height: 88vh;
-      }
+      .modal { padding: 24px 20px; width: 100%; max-width: none; border-radius: 14px; max-height: 88vh; }
+      .profile-avatar-big { width: 80px; height: 80px; font-size: 30px; }
 
-      .profile-avatar-big {
-        width: 80px;
-        height: 80px;
-        font-size: 30px;
-      }
+      .edit-panel, .reply-panel { padding: 8px 14px; }
+      .search-messages-panel { padding: 8px 14px; }
 
-      .edit-panel, .reply-panel {
-        padding: 8px 14px;
-      }
-
-      .search-messages-panel {
-        padding: 8px 14px;
-      }
-
-      .sidebar-header {
-        padding: 12px 16px 10px;
-        padding-top: calc(12px + var(--safe-top));
-      }
-
+      .sidebar-header { padding: 12px 16px 10px; padding-top: calc(12px + var(--safe-top)); }
       .ithub-logo { height: 36px; }
       .sidebar-header-info { font-size: 11px; }
 
@@ -1408,40 +1167,23 @@
       .chat-header { padding: 8px 10px; padding-top: calc(8px + var(--safe-top)); }
       .chat-header .chat-contact-name { font-size: 15px; }
       .chat-header .chat-contact-status { font-size: 11px; }
-
-      .message-bubble {
-        font-size: 14px;
-        padding: 8px 12px;
-      }
-
+      .message-bubble { font-size: 14px; padding: 8px 12px; }
       .input-area { padding: 6px 8px; padding-bottom: calc(6px + var(--safe-bottom)); }
-
       .contact-item { padding: 10px 14px; }
       .contact-name { font-size: 14px; }
       .contact-sub { font-size: 11px; }
-
       .sidebar-header { padding: 10px 14px 8px; padding-top: calc(10px + var(--safe-top)); }
       .sidebar-header-info { font-size: 11px; }
-
       .profile-avatar-big { width: 72px; height: 72px; font-size: 26px; }
       .modal { padding: 20px 16px; }
-
-      .mobile-menu-btn, .mobile-back-btn {
-        width: 36px;
-        height: 36px;
-      }
-
-      .header-action-btn {
-        width: 34px;
-        height: 34px;
-      }
+      .mobile-menu-btn, .mobile-back-btn { width: 36px; height: 36px; }
+      .header-action-btn { width: 34px; height: 34px; }
     }
   </style>
 </head>
 <body>
 
 <div class="app-wrapper">
-
   <div class="login-container" id="login-container">
     <div class="login-card">
       <h1>Добро пожаловать!</h1>
@@ -1463,8 +1205,8 @@
           <path d="M 32 8 L 46 8 L 52 14 L 52 28 L 32 28 Z" fill="none" stroke-width="3" class="logo-dark"/>
           <rect x="4" y="32" width="20" height="20" fill="none" stroke-width="3" class="logo-dark"/>
           <rect x="32" y="32" width="20" height="20" fill="none" stroke-width="3" class="logo-dark"/>
-          <text x="64" y="26" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" class="logo-dark-text">ITHub</text>
-          <text x="64" y="49" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" class="logo-gray">MSG</text>
+          <text x="64" y="26" font-family="Arial, sans-serif" font-size="21" font-weight="700" class="logo-dark-text">ITHub</text>
+          <text x="64" y="49" font-family="Arial, sans-serif" font-size="21" font-weight="700" class="logo-gray">MSG</text>
         </svg>
         <div class="sidebar-header-info" id="sidebar-user-info">Загрузка...</div>
       </div>
@@ -1572,10 +1314,8 @@
 </div>
 
 <input type="file" id="avatar-input" accept="image/*" style="display:none;" />
-
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  // ===== СОСТОЯНИЕ =====
   let currentUser = null;
   let contacts = [];
   let currentContactId = null;
@@ -1596,7 +1336,6 @@
   let searchQuery = '';
   let currentImageUrl = '';
 
-  // ===== DOM =====
   const loginContainer = document.getElementById('login-container');
   const messenger = document.getElementById('messenger');
   const sidebar = document.getElementById('sidebar');
@@ -1626,15 +1365,12 @@
   const searchMessagesInput = document.getElementById('search-messages-input');
   const searchMessagesCount = document.getElementById('search-messages-count');
   const searchMsgBtn = document.getElementById('search-msg-btn');
-
   const imageViewer = document.getElementById('image-viewer');
   const imageViewerImg = document.getElementById('image-viewer-img');
-
   const modalOverlay = document.getElementById('modal-overlay');
   const modalTitle = document.getElementById('modal-title');
   const modalBody = document.getElementById('modal-body');
 
-  // ===== ТЕМА =====
   function applyTheme() {
     const theme = localStorage.getItem('theme') || 'light';
     if (theme === 'dark') document.body.classList.add('dark');
@@ -1642,10 +1378,7 @@
   }
   applyTheme();
 
-  // ===== МОБИЛЬНАЯ НАВИГАЦИЯ =====
-  function isMobile() {
-    return window.innerWidth <= 768;
-  }
+  function isMobile() { return window.innerWidth <= 768; }
 
   function openChatMobile() {
     if (!isMobile()) return;
@@ -1665,7 +1398,6 @@
     }
   });
 
-  // ===== УВЕДОМЛЕНИЯ =====
   function requestNotificationPermission() {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
@@ -1680,17 +1412,12 @@
 
     try {
       const n = new Notification('ITHub — ' + fromName, {
-        body: text,
-        icon: '/icon-192.png',
-        tag: 'ithub-msg'
+        body: text, icon: '/icon-192.png', tag: 'ithub-msg'
       });
       setTimeout(() => n.close(), 5000);
-    } catch (e) {
-      console.error('Ошибка уведомления:', e);
-    }
+    } catch (e) {}
   }
 
-  // ===== ПРОСМОТР ИЗОБРАЖЕНИЙ =====
   function openImageViewer(src) {
     currentImageUrl = src;
     imageViewerImg.src = src;
@@ -1717,15 +1444,12 @@
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      if (imageViewer.classList.contains('show')) {
-        closeImageViewer();
-      } else if (isMobile() && chatArea.classList.contains('visible')) {
-        backToContacts();
-      }
+      if (imageViewer.classList.contains('show')) closeImageViewer();
+      else if (modalOverlay.classList.contains('show')) closeModal();
+      else if (isMobile() && chatArea.classList.contains('visible')) backToContacts();
     }
   });
 
-  // ===== РЕНДЕР АВАТАРКИ =====
   function renderAvatar(el, user, size) {
     el.innerHTML = '';
     const inner = document.createElement('div');
@@ -1733,7 +1457,7 @@
 
     if (user.avatar) {
       const img = document.createElement('img');
-      img.src = '/uploads/' + user.avatar;
+      img.src = '/uploads/' + user.avatar + '?t=' + Date.now();
       inner.appendChild(img);
     } else {
       inner.textContent = getInitials(user.fullName);
@@ -1761,7 +1485,7 @@
 
     if (contact.avatar) {
       const img = document.createElement('img');
-      img.src = '/uploads/' + contact.avatar;
+      img.src = '/uploads/' + contact.avatar + '?t=' + Date.now();
       inner.appendChild(img);
     } else {
       inner.textContent = getInitials(contact.fullName);
@@ -1796,14 +1520,12 @@
     if (!currentContactId) return;
     const contact = contacts.find(c => c.id === currentContactId);
     if (!contact) return;
-
     const sub = contact.role === 'teacher' ? 'Преподаватель' : 'Студент';
     const st = getStatusText(contact.id);
     chatContactStatus.textContent = `${sub} · ${st.text}`;
     chatContactStatus.style.color = st.color;
   }
 
-  // ===== ВХОД =====
   function login() {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
@@ -1865,10 +1587,7 @@
             if (data.by === currentContactId) {
               messagesArea.querySelectorAll('.message-wrapper.my').forEach(w => {
                 const st = w.querySelector('.message-status');
-                if (st) {
-                  st.textContent = '✓✓';
-                  st.classList.add('read');
-                }
+                if (st) { st.textContent = '✓✓'; st.classList.add('read'); }
               });
             }
           });
@@ -1877,14 +1596,7 @@
             const wrapper = messagesArea.querySelector(`[data-msg-id="${data.id}"]`);
             if (!wrapper) return;
             const bubble = wrapper.querySelector('.message-bubble');
-            const textNode = Array.from(bubble.childNodes).find(n => n.nodeType === 3);
-            if (textNode) textNode.textContent = data.text;
-            if (!bubble.querySelector('.message-edited')) {
-              const edited = document.createElement('span');
-              edited.className = 'message-edited';
-              edited.textContent = '(изменено)';
-              bubble.appendChild(edited);
-            }
+            updateBubbleText(bubble, data.text);
           });
 
           socket.on('message-deleted', (data) => {
@@ -1977,28 +1689,91 @@
     }, 2000);
   }
 
+  // ===== ИСПРАВЛЕННЫЙ ВЫХОД =====
   function logout() {
-    if (socket) socket.disconnect();
+    // 1. Закрываем ВСЕ модалки и панели
+    modalOverlay.classList.remove('show');
+    editPanel.classList.remove('show');
+    replyPanel.classList.remove('show');
+    searchMessagesPanel.classList.remove('show');
+    inputArea.classList.remove('editing');
+    inputArea.classList.remove('replying');
+    imageViewer.classList.remove('show');
+
+    // 2. Отключаем socket
+    if (socket) {
+      try { socket.disconnect(); } catch(e) {}
+      socket = null;
+    }
+
+    // 3. Сбрасываем состояние
     currentUser = null;
     currentContactId = null;
     selectedGroup = 'all';
     onlineUsers = [];
+    unreadCounts = {};
+    editingMessage = null;
+    editingWrapper = null;
+    replyingTo = null;
+    pendingMessages.clear();
+
+    // 4. Очищаем UI
+    messagesArea.innerHTML = `<div class="no-messages">Выберите собеседника, чтобы начать чат</div>`;
+    contactsList.innerHTML = '';
+    chatContactName.textContent = 'Выберите контакт';
+    chatContactStatus.textContent = 'онлайн';
+    chatContactStatus.style.color = 'var(--accent)';
+    chatAvatar.innerHTML = '?';
+    sidebarUserInfo.textContent = 'Загрузка...';
+    document.getElementById('group-filter').style.display = 'none';
+    document.getElementById('group-filter').innerHTML = '';
+
+    // 5. Показываем страницу входа
     messenger.style.display = 'none';
     loginContainer.style.display = 'flex';
     document.title = 'ITHub Мессенджер';
+
+    // 6. Очищаем поля
     document.getElementById('email').value = '';
     document.getElementById('password').value = '';
     loginError.textContent = '';
-    pendingMessages.clear();
+
+    // 7. Сбрасываем мобильные классы
     sidebar.classList.remove('hidden');
     chatArea.classList.remove('visible');
+
+    console.log('✅ Вы вышли из аккаунта');
+  }
+
+  function updateBubbleText(bubble, newText) {
+    // 1. Сохраняем reply-quote, если есть
+    const replyQuote = bubble.querySelector('.reply-quote');
+    const savedReply = replyQuote ? replyQuote.cloneNode(true) : null;
+
+    // 2. ПОЛНОСТЬЮ очищаем bubble
+    bubble.innerHTML = '';
+
+    // 3. Вставляем reply-quote обратно (если был)
+    if (savedReply) {
+      bubble.appendChild(savedReply);
+    }
+
+    // 4. Вставляем НОВЫЙ текст
+    const textNode = document.createTextNode(newText);
+    bubble.appendChild(textNode);
+
+    // 5. Добавляем "(изменено)"
+    const edited = document.createElement('span');
+    edited.className = 'message-edited';
+    edited.textContent = '(изменено)';
+    bubble.appendChild(edited);
   }
 
   function openProfile() {
     modalTitle.textContent = 'Профиль';
 
     const avatarHtml = currentUser.avatar
-      ? `<img src="/uploads/${currentUser.avatar}" />`
+      ? `<img src="/uploads/${currentUser.avatar}?t=${Date.now()}" />`
       : getInitials(currentUser.fullName);
 
     modalBody.innerHTML = `
@@ -2034,10 +1809,8 @@
     const file = e.target.files[0];
     if (!file) return;
 
-    console.log('Загружаю аватарку:', file.name, file.size, 'байт', file.type);
-
-    if (file.size > 10 * 1024 * 1024) {
-      alert('Файл слишком большой (максимум 10 МБ)');
+    if (file.size > 20 * 1024 * 1024) {
+      alert('Файл слишком большой (максимум 20 МБ)');
       avatarInput.value = '';
       return;
     }
@@ -2052,22 +1825,15 @@
     formData.append('avatar', file);
     formData.append('userId', currentUser.id);
 
-    fetch('/upload-avatar', { 
-      method: 'POST', 
-      body: formData
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Сервер ответил: ' + res.status);
-        return res.json();
-      })
+    fetch('/upload-avatar', { method: 'POST', body: formData })
+      .then(res => res.json())
       .then(data => {
         if (data.success) {
           currentUser.avatar = data.filename;
           const bigAvatar = document.querySelector('.profile-avatar-big');
           if (bigAvatar) {
-            bigAvatar.innerHTML = `<img src="/uploads/${data.filename}" /><div class="overlay">Сменить</div>`;
+            bigAvatar.innerHTML = `<img src="/uploads/${data.filename}?t=${Date.now()}" /><div class="overlay">Сменить</div>`;
           }
-          alert('Аватарка обновлена!');
         } else {
           alert('Не удалось загрузить: ' + (data.error || 'неизвестная ошибка'));
         }
@@ -2149,7 +1915,7 @@
 
     modalTitle.textContent = 'Профиль';
     const avatarHtml = contact.avatar
-      ? `<img src="/uploads/${contact.avatar}" />`
+      ? `<img src="/uploads/${contact.avatar}?t=${Date.now()}" />`
       : getInitials(contact.fullName);
     const st = getStatusText(contact.id);
 
@@ -2500,7 +2266,6 @@
     wrapper.appendChild(bubble);
     wrapper.appendChild(time);
 
-    // ===== ДОЛГОЕ НАЖАТИЕ И ПКМ =====
     let longPressTimer = null;
     let longPressTriggered = false;
     let touchStartX = 0;
@@ -2658,7 +2423,6 @@
     const menu = document.createElement('div');
     menu.className = 'context-menu show';
 
-    // Ограничиваем позицию, чтобы меню не вылезало за экран
     const menuWidth = 180;
     const menuHeight = msg.isMine ? 150 : 60;
     const maxX = window.innerWidth - menuWidth - 10;
@@ -2693,7 +2457,6 @@
 
     document.body.appendChild(menu);
 
-    // Закрытие при клике вне меню
     setTimeout(() => {
       const closeMenu = (e) => {
         if (!menu.contains(e.target)) {
@@ -2744,37 +2507,34 @@
     messageInput.focus();
   }
 
-  function saveEdit() {
+    function saveEdit() {
     if (!editingMessage || !editingWrapper) return;
     const newText = messageInput.value.trim();
     if (!newText || newText === editingMessage.text) { cancelEdit(); return; }
 
+    const msgId = editingMessage.id;
+    const wrapper = editingWrapper;
+
+    // СРАЗУ обновляем UI — не ждём ответа сервера
+    const bubble = wrapper.querySelector('.message-bubble');
+    updateBubbleText(bubble, newText);
+    editingMessage.text = newText;
+    cancelEdit();
+
+    // Отправляем на сервер в фоне
     fetch('/edit-message', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: editingMessage.id, text: newText, from: currentUser.id })
+      body: JSON.stringify({ id: msgId, text: newText, from: currentUser.id })
     })
       .then(res => res.json())
       .then(data => {
-        if (data.success) {
-          const bubble = editingWrapper.querySelector('.message-bubble');
-          const textNode = Array.from(bubble.childNodes).find(n => n.nodeType === 3);
-          if (textNode) textNode.textContent = newText;
-          if (!bubble.querySelector('.message-edited')) {
-            const edited = document.createElement('span');
-            edited.className = 'message-edited';
-            edited.textContent = '(изменено)';
-            bubble.appendChild(edited);
-          }
-          editingMessage.text = newText;
-          cancelEdit();
-        } else {
-          alert('Не удалось изменить: ' + (data.error || 'неизвестная ошибка'));
+        if (!data.success) {
+          console.error('Сервер не подтвердил изменение:', data.error);
         }
       })
       .catch(err => {
         console.error('Ошибка изменения:', err);
-        alert('Ошибка соединения');
       });
   }
 
@@ -2922,19 +2682,10 @@
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
       let mimeType = 'audio/webm';
-      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-        mimeType = 'audio/webm;codecs=opus';
-      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
-        mimeType = 'audio/webm';
-      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-        mimeType = 'audio/mp4';
-      } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
-        mimeType = 'audio/ogg';
-      } else if (MediaRecorder.isTypeSupported('audio/wav')) {
-        mimeType = 'audio/wav';
-      }
-      
-      console.log('Используем MIME-тип:', mimeType);
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mimeType = 'audio/webm;codecs=opus';
+      else if (MediaRecorder.isTypeSupported('audio/webm')) mimeType = 'audio/webm';
+      else if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
+      else if (MediaRecorder.isTypeSupported('audio/ogg')) mimeType = 'audio/ogg';
       
       mediaRecorder = new MediaRecorder(stream, { mimeType: mimeType });
       audioChunks = [];
@@ -2944,7 +2695,6 @@
         let ext = 'webm';
         if (mimeType.includes('mp4')) ext = 'm4a';
         else if (mimeType.includes('ogg')) ext = 'ogg';
-        else if (mimeType.includes('wav')) ext = 'wav';
         sendVoiceMessage(audioBlob, ext);
       };
       mediaRecorder.start();
@@ -3014,12 +2764,12 @@
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/service-worker.js')
-        .then(() => console.log('✅ Service Worker зарегистрирован'))
+        .then(() => console.log('✅ SW зарегистрирован'))
         .catch((err) => console.error('❌ Ошибка SW:', err));
     });
   }
 
-  console.log('✅ ITHub Messenger v20.0 (Долгое нажатие, ГС, аватарки) загружен');
+  console.log('✅ ITHub Messenger v22.0 (Выход с закрытием модалки) загружен');
 </script>
 </body>
 </html>

@@ -1,7 +1,6 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const sqlite3 = require('sqlite3').verbose();
@@ -12,7 +11,7 @@ const io = socketIo(server);
 
 const PORT = process.env.PORT || 3000;
 
-// ===== CORS для мобильных =====
+// ===== CORS =====
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -23,15 +22,23 @@ app.use((req, res, next) => {
 
 // ===== СТАТИКА =====
 app.use(express.static('public'));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 app.use('/uploads', express.static('uploads'));
+
+// ===== ПРОВЕРКА ПАПКИ uploads =====
+if (!fs.existsSync('./uploads')) {
+  fs.mkdirSync('./uploads');
+  console.log('Создана папка uploads');
+}
 
 // ===== ЗАГРУЗКА ФАЙЛОВ =====
 const storage = multer.diskStorage({
-  destination: './uploads/',
+  destination: (req, file, cb) => {
+    cb(null, './uploads/');
+  },
   filename: (req, file, cb) => {
-    const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-    cb(null, Date.now() + '-' + safeName);
+    const safeName = Date.now() + '_' + file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+    cb(null, safeName);
   }
 });
 const upload = multer({ 
@@ -41,15 +48,25 @@ const upload = multer({
 
 // ===== ЗАГРУЗКА АВАТАРОК =====
 const avatarStorage = multer.diskStorage({
-  destination: './uploads/',
+  destination: (req, file, cb) => {
+    cb(null, './uploads/');
+  },
   filename: (req, file, cb) => {
-    const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-    cb(null, 'avatar_' + Date.now() + '_' + safeName);
+    const ext = file.originalname.split('.').pop() || 'jpg';
+    const filename = 'avatar_' + Date.now() + '.' + ext.replace(/[^a-zA-Z0-9]/g, '');
+    console.log('Сохраняем аватарку как:', filename);
+    cb(null, filename);
   }
 });
 const uploadAvatar = multer({ 
   storage: avatarStorage,
-  limits: { fileSize: 10 * 1024 * 1024 }
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('Только изображения'), false);
+    }
+    cb(null, true);
+  }
 });
 
 // ===== БАЗА ДАННЫХ =====
@@ -75,14 +92,27 @@ db.serialize(() => {
 
 // ===== WHITELIST =====
 function readWhitelist() {
-  return JSON.parse(fs.readFileSync('./whitelist.json', 'utf8'));
+  try {
+    return JSON.parse(fs.readFileSync('./whitelist.json', 'utf8'));
+  } catch (err) {
+    console.error('Ошибка чтения whitelist.json:', err);
+    return { users: [] };
+  }
 }
 
 function saveWhitelist(data) {
-  fs.writeFileSync('./whitelist.json', JSON.stringify(data, null, 2), 'utf8');
+  try {
+    fs.writeFileSync('./whitelist.json', JSON.stringify(data, null, 2), 'utf8');
+    return true;
+  } catch (err) {
+    console.error('Ошибка сохранения whitelist.json:', err);
+    return false;
+  }
 }
 
-// ===== АВТОРИЗАЦИЯ =====
+const bcrypt = require('bcryptjs');
+
+// ===== АВТОРИЗАЦИЯ (с bcrypt) =====
 app.post('/login', (req, res) => {
   const { login, password } = req.body;
   const whitelist = readWhitelist();
@@ -92,12 +122,24 @@ app.post('/login', (req, res) => {
     return res.status(401).json({ success: false, error: 'Неверный логин или пароль' });
   }
 
-  // Простое сравнение пароля (без bcrypt для простоты)
-  if (user.password !== password) {
+  // Проверка: хеш или открытый текст
+  let passwordOk = false;
+  if (user.password && (user.password.startsWith('$2a$') || user.password.startsWith('$2b$'))) {
+    passwordOk = bcrypt.compareSync(password, user.password);
+  } else {
+    // Старый пароль в открытом виде — сравнение напрямую
+    passwordOk = user.password === password;
+    // И сразу перехешируем
+    if (passwordOk) {
+      user.password = bcrypt.hashSync(password, 10);
+      saveWhitelist(whitelist);
+    }
+  }
+
+  if (!passwordOk) {
     return res.status(401).json({ success: false, error: 'Неверный логин или пароль' });
   }
 
-  // Обновляем lastSeen
   user.lastSeen = new Date().toISOString();
   saveWhitelist(whitelist);
 
@@ -128,7 +170,7 @@ app.get('/contacts', (req, res) => {
   res.json(contacts);
 });
 
-// ===== ИСТОРИЯ СООБЩЕНИЙ =====
+// ===== ИСТОРИЯ =====
 app.get('/messages', (req, res) => {
   const { from, to } = req.query;
 
@@ -151,20 +193,6 @@ app.get('/messages', (req, res) => {
   );
 });
 
-// ===== ОТМЕТИТЬ КАК ПРОЧИТАННЫЕ =====
-app.post('/mark-read', (req, res) => {
-  const { from, to } = req.body;
-  db.run(
-    `UPDATE messages SET read = 1 WHERE from_user = ? AND to_user = ?`,
-    [from, to],
-    function(err) {
-      if (err) return res.status(500).json({ success: false });
-      io.to(`user_${from}`).emit('messages-read', { by: to });
-      res.json({ success: true });
-    }
-  );
-});
-
 // ===== ИЗМЕНЕНИЕ СООБЩЕНИЯ =====
 app.post('/edit-message', (req, res) => {
   const { id, text, from } = req.body;
@@ -180,8 +208,12 @@ app.post('/edit-message', (req, res) => {
       [text, id],
       function(err) {
         if (err) return res.status(500).json({ success: false, error: err.message });
-        io.to(`user_${row.to_user}`).emit('message-edited', { id, text });
-        io.to(`user_${row.from_user}`).emit('message-edited', { id, text });
+        
+        // Отправляем обоим участникам
+        const data = { id: parseInt(id), text };
+        io.to(`user_${row.to_user}`).emit('message-edited', data);
+        io.to(`user_${row.from_user}`).emit('message-edited', data);
+        
         res.json({ success: true });
       }
     );
@@ -200,11 +232,27 @@ app.post('/delete-message', (req, res) => {
 
     db.run(`DELETE FROM messages WHERE id = ?`, [id], function(err) {
       if (err) return res.status(500).json({ success: false, error: err.message });
-      io.to(`user_${row.to_user}`).emit('message-deleted', { id });
-      io.to(`user_${row.from_user}`).emit('message-deleted', { id });
+      
+      io.to(`user_${row.to_user}`).emit('message-deleted', { id: parseInt(id) });
+      io.to(`user_${row.from_user}`).emit('message-deleted', { id: parseInt(id) });
+      
       res.json({ success: true });
     });
   });
+});
+
+// ===== MARK-READ =====
+app.post('/mark-read', (req, res) => {
+  const { from, to } = req.body;
+  db.run(
+    `UPDATE messages SET read = 1 WHERE from_user = ? AND to_user = ?`,
+    [from, to],
+    function(err) {
+      if (err) return res.status(500).json({ success: false });
+      io.to(`user_${from}`).emit('messages-read', { by: parseInt(to) });
+      res.json({ success: true });
+    }
+  );
 });
 
 // ===== ЗАГРУЗКА ФАЙЛОВ =====
@@ -215,36 +263,53 @@ app.post('/upload', upload.single('file'), (req, res) => {
 });
 
 // ===== АВАТАРКА =====
-app.post('/upload-avatar', uploadAvatar.single('avatar'), (req, res) => {
-  console.log('=== Загрузка аватарки ===');
-  console.log('File:', req.file ? req.file.filename : 'НЕТ');
-  console.log('Body:', req.body);
+app.post('/upload-avatar', (req, res) => {
+  console.log('=== Запрос на загрузку аватарки ===');
+  
+  uploadAvatar.single('avatar')(req, res, (err) => {
+    if (err) {
+      console.error('Ошибка multer:', err);
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Ошибка загрузки: ' + err.message 
+      });
+    }
 
-  if (!req.file) {
-    return res.status(400).json({ success: false, error: 'Файл не получен' });
-  }
+    if (!req.file) {
+      console.error('Файл не получен');
+      return res.status(400).json({ success: false, error: 'Файл не получен' });
+    }
 
-  const { filename } = req.file;
-  const userId = parseInt(req.body.userId);
+    console.log('Файл загружен:', req.file.filename);
+    console.log('Body:', req.body);
 
-  if (!userId) {
-    return res.status(400).json({ success: false, error: 'userId не передан' });
-  }
+    const { filename } = req.file;
+    const userId = parseInt(req.body.userId);
 
-  const data = readWhitelist();
-  const user = data.users.find(u => u.id === userId);
+    if (!userId) {
+      console.error('userId не передан');
+      return res.status(400).json({ success: false, error: 'userId не передан' });
+    }
 
-  if (user) {
+    const data = readWhitelist();
+    const user = data.users.find(u => u.id === userId);
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'Пользователь не найден' });
+    }
+
     user.avatar = filename;
-    saveWhitelist(data);
-    io.emit('avatar-updated', { userId, avatar: filename });
-    res.json({ success: true, filename });
-  } else {
-    res.status(404).json({ success: false, error: 'Пользователь не найден' });
-  }
+    if (saveWhitelist(data)) {
+      console.log('Аватарка сохранена:', filename);
+      io.emit('avatar-updated', { userId, avatar: filename });
+      res.json({ success: true, filename });
+    } else {
+      res.status(500).json({ success: false, error: 'Не удалось сохранить whitelist.json' });
+    }
+  });
 });
 
-// ===== СМЕНА ПАРОЛЯ =====
+// ===== СМЕНА ПАРОЛЯ (с bcrypt) =====
 app.post('/change-password', (req, res) => {
   const { userId, oldPassword, newPassword } = req.body;
   if (!userId || !oldPassword || !newPassword) {
@@ -254,10 +319,20 @@ app.post('/change-password', (req, res) => {
   const data = readWhitelist();
   const user = data.users.find(u => u.id === userId);
   if (!user) return res.status(404).json({ success: false, error: 'Пользователь не найден' });
-  if (user.password !== oldPassword) return res.status(403).json({ success: false, error: 'Неверный текущий пароль' });
+
+  // Проверка старого пароля
+  let oldOk = false;
+  if (user.password && (user.password.startsWith('$2a$') || user.password.startsWith('$2b$'))) {
+    oldOk = bcrypt.compareSync(oldPassword, user.password);
+  } else {
+    oldOk = user.password === oldPassword;
+  }
+
+  if (!oldOk) return res.status(403).json({ success: false, error: 'Неверный текущий пароль' });
   if (newPassword.length < 4) return res.status(400).json({ success: false, error: 'Пароль слишком короткий' });
 
-  user.password = newPassword;
+  // Хешируем новый пароль
+  user.password = bcrypt.hashSync(newPassword, 10);
   saveWhitelist(data);
   res.json({ success: true });
 });
@@ -383,7 +458,6 @@ io.on('connection', (socket) => {
           onlineUsers.delete(userId);
           offlineTimers.delete(userId);
           broadcastOnlineUsers();
-          console.log(`Пользователь ${userId} ушёл в офлайн`);
         }, 2 * 60 * 1000);
         offlineTimers.set(userId, t);
       }
