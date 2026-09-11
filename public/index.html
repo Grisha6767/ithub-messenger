@@ -1,12 +1,14 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#7C5CFC">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>ITHub Мессенджер</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#7C5CFC">
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
   <link rel="apple-touch-icon" href="/icon-192.png">
   <style>
@@ -27,6 +29,10 @@
       --danger: #E74C3C;
       --online: #4ADE80;
       --away: #FBBF24;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left: env(safe-area-inset-left, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
     }
 
     body.dark {
@@ -45,28 +51,37 @@
       --scrollbar: #3A3A5A;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
     html, body {
       height: 100%;
       width: 100%;
       overflow: hidden;
-      font-family: 'Segoe UI', Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
       background: var(--bg-primary);
       color: var(--text-primary);
       transition: background 0.3s, color 0.3s;
+      overscroll-behavior: none;
+      -webkit-font-smoothing: antialiased;
+      -webkit-text-size-adjust: 100%;
+      touch-action: manipulation;
     }
 
     .app-wrapper {
       display: flex;
       height: 100vh;
+      height: 100dvh;
       width: 100vw;
       background: var(--bg-primary);
       overflow: hidden;
       transition: background 0.3s;
     }
 
-    /* ===== АНИМАЦИИ ===== */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
@@ -86,7 +101,6 @@
       animation: messageIn 0.25s ease;
     }
 
-    /* ===== ВХОД ===== */
     .login-container {
       width: 100%;
       height: 100%;
@@ -96,6 +110,8 @@
       align-items: center;
       background: var(--bg-primary);
       padding: 20px;
+      padding-top: calc(20px + var(--safe-top));
+      padding-bottom: calc(20px + var(--safe-bottom));
       animation: fadeIn 0.4s ease;
     }
 
@@ -122,7 +138,7 @@
       border-radius: 10px;
       background: var(--bg-input);
       color: var(--text-primary);
-      font-size: 15px;
+      font-size: 16px;
       transition: border 0.2s, background 0.3s;
     }
 
@@ -140,6 +156,7 @@
       cursor: pointer;
       margin-top: 12px;
       transition: background 0.2s, transform 0.1s;
+      font-family: inherit;
     }
 
     .login-card button:hover { background: var(--accent-hover); }
@@ -149,10 +166,9 @@
 
     .messenger { display: none; width: 100%; height: 100%; flex: 1; animation: fadeIn 0.3s ease; }
 
-    /* ===== БОКОВАЯ ПАНЕЛЬ ===== */
     .sidebar {
-      width: 300px;
-      min-width: 240px;
+      width: 340px;
+      min-width: 280px;
       background: var(--bg-secondary);
       border-right: 1px solid var(--border);
       display: flex;
@@ -165,6 +181,7 @@
 
     .sidebar-header {
       padding: 14px 20px 12px;
+      padding-top: calc(14px + var(--safe-top));
       border-bottom: 1px solid var(--border);
       background: var(--bg-secondary);
       flex-shrink: 0;
@@ -176,7 +193,7 @@
 
     .ithub-logo {
       width: auto;
-      height: 46px;
+      height: 42px;
       display: block;
     }
 
@@ -190,35 +207,42 @@
       max-width: 100%;
     }
 
-    /* ===== ЛОГОТИП: СВЕТЛАЯ ТЕМА ===== */
-    .ithub-logo .logo-dark {
-      stroke: #1A1A2E;
-    }
-    .ithub-logo .logo-dark-fill {
-      fill: #1A1A2E;
-      stroke: none;
-    }
-    .ithub-logo .logo-dark-text {
-      fill: #1A1A2E;
-      stroke: none;
-    }
-    .ithub-logo .logo-gray {
-      fill: #B0B0B0;
-      stroke: none;
+    .ithub-logo .logo-dark { stroke: #1A1A2E; }
+    .ithub-logo .logo-dark-fill { fill: #1A1A2E; stroke: none; }
+    .ithub-logo .logo-dark-text { fill: #1A1A2E; stroke: none; }
+    .ithub-logo .logo-gray { fill: #B0B0B0; stroke: none; }
+
+    body.dark .ithub-logo .logo-dark { stroke: #FFFFFF; }
+    body.dark .ithub-logo .logo-dark-fill { fill: #FFFFFF; }
+    body.dark .ithub-logo .logo-dark-text { fill: #FFFFFF; }
+    body.dark .ithub-logo .logo-gray { fill: #FFFFFF; }
+
+    .mobile-menu-btn,
+    .mobile-back-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s;
     }
 
-    /* ===== ЛОГОТИП: ТЁМНАЯ ТЕМА ===== */
-    body.dark .ithub-logo .logo-dark {
-      stroke: #FFFFFF;
+    .mobile-menu-btn:active,
+    .mobile-back-btn:active {
+      background: var(--bg-hover);
     }
-    body.dark .ithub-logo .logo-dark-fill {
-      fill: #FFFFFF;
-    }
-    body.dark .ithub-logo .logo-dark-text {
-      fill: #FFFFFF;
-    }
-    body.dark .ithub-logo .logo-gray {
-      fill: #FFFFFF;
+
+    .mobile-menu-btn svg,
+    .mobile-back-btn svg {
+      width: 22px;
+      height: 22px;
     }
 
     .group-filter {
@@ -256,15 +280,58 @@
       border-radius: 10px;
       background: var(--bg-primary);
       color: var(--text-primary);
-      font-size: 14px;
+      font-size: 16px;
       transition: border 0.2s, background 0.3s;
     }
 
     .search-box input:focus { outline: none; border-color: var(--accent); }
 
-    .contacts-list { flex: 1; overflow-y: auto; padding: 6px 0; }
+    .contacts-list { flex: 1; overflow-y: auto; padding: 6px 0; -webkit-overflow-scrolling: touch; }
     .contacts-list::-webkit-scrollbar { width: 4px; }
     .contacts-list::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 4px; }
+
+    .sidebar-footer {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      padding-bottom: calc(12px + var(--safe-bottom));
+      border-top: 1px solid var(--border);
+      background: var(--bg-secondary);
+      flex-shrink: 0;
+    }
+
+    .sidebar-footer-btn {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg-primary);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .sidebar-footer-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent);
+    }
+
+    .sidebar-footer-btn:active {
+      transform: scale(0.98);
+    }
+
+    .sidebar-footer-btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
 
     .contact-item {
       display: flex;
@@ -274,10 +341,11 @@
       transition: background 0.15s, transform 0.1s;
       border-left: 3px solid transparent;
       position: relative;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .contact-item:hover { background: var(--bg-hover); }
-    .contact-item:active { transform: scale(0.99); }
+    .contact-item:active { transform: scale(0.99); background: var(--bg-hover); }
     .contact-item.active { background: var(--bg-hover); border-left-color: var(--accent); }
 
     .avatar {
@@ -353,13 +421,14 @@
       align-items: center;
       justify-content: space-between;
       padding: 16px 28px;
+      padding-top: calc(16px + var(--safe-top));
       border-bottom: 1px solid var(--border);
       background: var(--bg-primary);
       flex-shrink: 0;
       min-height: 76px;
     }
 
-    .chat-header-left { display: flex; align-items: center; }
+    .chat-header-left { display: flex; align-items: center; min-width: 0; flex: 1; }
     .chat-header .avatar {
       width: 44px;
       height: 44px;
@@ -377,6 +446,14 @@
     .chat-header-left .clickable-name {
       cursor: pointer;
       transition: opacity 0.15s;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .chat-header-left .clickable-name > div {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .chat-header-left .clickable-name:hover { opacity: 0.75; }
@@ -385,6 +462,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-shrink: 0;
     }
 
     .header-action-btn {
@@ -405,91 +483,15 @@
     .header-action-btn:hover { background: var(--bg-hover); }
     .header-action-btn svg { width: 20px; height: 20px; }
 
-    .user-menu-wrapper { position: relative; cursor: pointer; flex-shrink: 0; }
-
-    .user-avatar-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: #FFFFFF;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 18px;
-      border: 2px solid var(--border);
-      transition: border-color 0.2s, transform 0.15s;
-      user-select: none;
-      overflow: hidden;
-    }
-
-    .user-avatar-btn img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .user-avatar-btn:hover { border-color: var(--accent); transform: scale(1.05); }
-
-    .dropdown-menu {
-      position: absolute;
-      top: 54px;
-      right: 0;
-      background: var(--bg-primary);
-      border-radius: 14px;
-      box-shadow: 0 12px 40px var(--shadow);
-      min-width: 220px;
-      padding: 6px 0;
-      display: none;
-      z-index: 1000;
-      border: 1px solid var(--border);
-      animation: popIn 0.15s ease;
-    }
-
-    .dropdown-menu.show { display: block; }
-
-    .dropdown-item {
-      padding: 11px 22px;
-      color: var(--text-primary);
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      transition: background 0.15s;
-      cursor: pointer;
-      border: none;
-      background: none;
-      width: 100%;
-      text-align: left;
-      font-family: inherit;
-    }
-
-    .dropdown-item:hover { background: var(--bg-hover); }
-    .dropdown-item svg { width: 18px; height: 18px; flex-shrink: 0; }
-    .dropdown-item.logout { color: var(--danger); }
-    .dropdown-item.logout:hover { background: rgba(231, 76, 60, 0.1); }
-
-    .dropdown-divider { height: 1px; background: var(--border); margin: 4px 14px; }
-
-    .dropdown-user-info {
-      padding: 12px 22px 8px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 4px;
-    }
-
-    .dropdown-user-info strong { color: var(--text-primary); display: block; font-size: 15px; }
-
     .messages-area {
       flex: 1;
-      padding: 24px 32px;
+      padding: 20px 32px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
       background: var(--bg-primary);
       transition: background 0.3s;
+      -webkit-overflow-scrolling: touch;
     }
 
     .messages-area::-webkit-scrollbar { width: 5px; }
@@ -624,7 +626,7 @@
     .context-menu.show { display: block; }
 
     .context-menu-item {
-      padding: 9px 16px;
+      padding: 10px 16px;
       font-size: 14px;
       color: var(--text-primary);
       display: flex;
@@ -690,7 +692,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(0, 0, 0, 0.95);
       display: none;
       align-items: center;
       justify-content: center;
@@ -701,16 +703,15 @@
     .image-viewer.show { display: flex; }
 
     .image-viewer img {
-      max-width: 92%;
-      max-height: 92%;
+      max-width: 96%;
+      max-height: 96%;
       border-radius: 8px;
-      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
       animation: popIn 0.25s ease;
     }
 
     .image-viewer .close-viewer {
       position: absolute;
-      top: 20px;
+      top: calc(20px + var(--safe-top));
       right: 24px;
       width: 48px;
       height: 48px;
@@ -733,7 +734,7 @@
 
     .image-viewer .download-btn {
       position: absolute;
-      top: 20px;
+      top: calc(20px + var(--safe-top));
       right: 84px;
       width: 48px;
       height: 48px;
@@ -824,8 +825,8 @@
       border: none;
       cursor: pointer;
       color: var(--text-secondary);
-      font-size: 20px;
-      padding: 0 6px;
+      font-size: 22px;
+      padding: 0 8px;
       transition: color 0.2s;
     }
 
@@ -833,13 +834,13 @@
 
     .input-area {
       display: flex;
-      align-items: center;
-      padding: 14px 28px 20px;
+      align-items: flex-end;
+      padding: 12px 24px;
+      padding-bottom: calc(12px + var(--safe-bottom));
       border-top: 1px solid var(--border);
       background: var(--bg-primary);
-      gap: 10px;
+      gap: 8px;
       flex-shrink: 0;
-      flex-wrap: wrap;
       transition: background 0.3s;
     }
 
@@ -862,26 +863,28 @@
     }
 
     .input-area .btn-icon:hover { background: var(--bg-hover); }
+    .input-area .btn-icon:active { background: var(--bg-hover); }
     .input-area .btn-icon svg { width: 22px; height: 22px; }
 
     .input-area input {
       flex: 1;
       padding: 12px 18px;
       border: 1.5px solid var(--border);
-      border-radius: 12px;
+      border-radius: 22px;
       background: var(--bg-input);
       color: var(--text-primary);
-      font-size: 15px;
+      font-size: 16px;
       transition: border 0.2s, background 0.3s;
-      min-width: 80px;
+      min-width: 0;
+      font-family: inherit;
     }
 
     .input-area input:focus { outline: none; border-color: var(--accent); }
 
     .input-area .btn-send {
-      padding: 12px 28px;
+      padding: 12px 24px;
       border: none;
-      border-radius: 12px;
+      border-radius: 22px;
       background: var(--accent);
       color: #FFFFFF;
       font-size: 15px;
@@ -892,6 +895,8 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      height: 44px;
+      font-family: inherit;
     }
 
     .input-area .btn-send:hover { background: var(--accent-hover); }
@@ -907,12 +912,15 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(0, 0, 0, 0.5);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 2000;
       animation: fadeIn 0.2s ease;
+      padding: 20px;
+      padding-top: calc(20px + var(--safe-top));
+      padding-bottom: calc(20px + var(--safe-bottom));
     }
 
     .modal-overlay.show { display: flex; }
@@ -922,12 +930,13 @@
       border-radius: 16px;
       padding: 32px 36px;
       max-width: 440px;
-      width: 92%;
+      width: 100%;
       box-shadow: 0 20px 60px var(--shadow);
       border: 1px solid var(--border);
       animation: popIn 0.25s ease;
       max-height: 90vh;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .modal h2 { font-size: 22px; color: var(--text-primary); margin-bottom: 16px; }
@@ -937,7 +946,7 @@
 
     .modal .close-btn {
       margin-top: 20px;
-      padding: 10px 24px;
+      padding: 12px 24px;
       border: none;
       border-radius: 10px;
       background: var(--accent);
@@ -947,6 +956,7 @@
       cursor: pointer;
       transition: background 0.2s;
       width: 100%;
+      font-family: inherit;
     }
 
     .modal .close-btn:hover { background: var(--accent-hover); }
@@ -1014,7 +1024,7 @@
 
     .profile-action-btn {
       flex: 1;
-      padding: 10px 16px;
+      padding: 12px 16px;
       border: 1.5px solid var(--border);
       border-radius: 10px;
       background: var(--bg-primary);
@@ -1046,8 +1056,9 @@
       border-radius: 10px;
       background: var(--bg-input);
       color: var(--text-primary);
-      font-size: 14px;
+      font-size: 16px;
       transition: border 0.2s;
+      font-family: inherit;
     }
 
     .password-form input:focus { outline: none; border-color: var(--accent); }
@@ -1064,6 +1075,7 @@
       cursor: pointer;
       margin-top: 6px;
       transition: background 0.2s;
+      font-family: inherit;
     }
 
     .password-form .save-btn:hover { background: var(--accent-hover); }
@@ -1141,7 +1153,8 @@
       border-radius: 10px;
       background: var(--bg-primary);
       color: var(--text-primary);
-      font-size: 14px;
+      font-size: 16px;
+      font-family: inherit;
     }
 
     .search-messages-panel input:focus { outline: none; border-color: var(--accent); }
@@ -1151,7 +1164,7 @@
       border: none;
       cursor: pointer;
       color: var(--text-secondary);
-      font-size: 20px;
+      font-size: 22px;
       padding: 0 6px;
     }
 
@@ -1216,37 +1229,202 @@
       border: none;
       cursor: pointer;
       color: var(--text-secondary);
-      font-size: 20px;
-      padding: 0 6px;
+      font-size: 22px;
+      padding: 0 8px;
       transition: color 0.2s;
     }
 
     .reply-panel .cancel-btn:hover { color: var(--danger); }
 
     @media (max-width: 768px) {
-      .sidebar { width: 220px; min-width: 160px; }
-      .chat-header { padding: 12px 18px; min-height: 64px; }
-      .messages-area { padding: 16px 18px; }
-      .input-area { padding: 10px 16px 16px; gap: 6px; }
-      .input-area input { font-size: 14px; padding: 10px 14px; min-width: 60px; }
-      .input-area .btn-send { padding: 10px 18px; font-size: 14px; }
-      .input-area .btn-icon { width: 38px; height: 38px; }
-      .input-area .btn-icon svg { width: 19px; height: 19px; }
-      .user-avatar-btn { width: 38px; height: 38px; font-size: 15px; }
-      .avatar { width: 38px; height: 38px; font-size: 15px; }
-      .login-card { padding: 32px 24px; }
-      .ithub-logo { height: 40px; }
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        min-width: 0;
+        height: 100vh;
+        height: 100dvh;
+        z-index: 100;
+        border-right: none;
+        transform: translateX(0);
+        transition: transform 0.3s ease;
+      }
+
+      .sidebar.hidden {
+        transform: translateX(-100%);
+      }
+
+      .chat-area {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        height: 100dvh;
+        z-index: 50;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+      }
+
+      .chat-area.visible {
+        transform: translateX(0);
+        z-index: 200;
+      }
+
+      .mobile-menu-btn,
+      .mobile-back-btn {
+        display: flex;
+      }
+
+      .chat-header {
+        padding: 10px 12px;
+        padding-top: calc(10px + var(--safe-top));
+        min-height: 56px;
+      }
+
+      .chat-header .avatar {
+        width: 38px;
+        height: 38px;
+        font-size: 15px;
+        margin-right: 10px;
+      }
+
+      .chat-header .chat-contact-name { font-size: 16px; }
+      .chat-header .chat-contact-status { font-size: 12px; }
+
+      .header-action-btn {
+        width: 36px;
+        height: 36px;
+        padding: 6px;
+      }
+
+      .header-action-btn svg { width: 18px; height: 18px; }
+
+      .messages-area {
+        padding: 12px 14px;
+      }
+
+      .message-wrapper { max-width: 88%; }
+
+      .message-bubble {
+        font-size: 15px;
+        padding: 9px 14px;
+        border-radius: 16px;
+      }
+
+      .message-bubble img { max-width: 200px; }
+
+      .input-area {
+        padding: 8px 10px;
+        padding-bottom: calc(8px + var(--safe-bottom));
+        gap: 4px;
+      }
+
+      .input-area input {
+        font-size: 16px;
+        padding: 10px 14px;
+        border-radius: 20px;
+      }
+
+      .input-area .btn-send {
+        padding: 10px 16px;
+        font-size: 14px;
+        border-radius: 20px;
+        height: 40px;
+      }
+
+      .input-area .btn-send svg { width: 16px; height: 16px; }
+
+      .input-area .btn-icon {
+        width: 38px;
+        height: 38px;
+        padding: 6px;
+      }
+
+      .input-area .btn-icon svg { width: 20px; height: 20px; }
+
+      .avatar { width: 42px; height: 42px; font-size: 16px; }
+
+      .contact-item { padding: 12px 16px; }
+      .contact-name { font-size: 15px; }
+      .contact-sub { font-size: 12px; }
+
+      .group-filter { padding: 8px 12px 4px; gap: 4px; }
+      .group-btn { font-size: 12px; padding: 5px 12px; }
+
+      .search-box { padding: 10px 12px 8px; }
+      .search-box input { padding: 9px 12px; font-size: 16px; }
+
+      .modal {
+        padding: 24px 20px;
+        width: 100%;
+        max-width: none;
+        border-radius: 14px;
+        max-height: 88vh;
+      }
+
+      .profile-avatar-big {
+        width: 80px;
+        height: 80px;
+        font-size: 30px;
+      }
+
+      .edit-panel, .reply-panel {
+        padding: 8px 14px;
+      }
+
+      .search-messages-panel {
+        padding: 8px 14px;
+      }
+
+      .sidebar-header {
+        padding: 12px 16px 10px;
+        padding-top: calc(12px + var(--safe-top));
+      }
+
+      .ithub-logo { height: 36px; }
+      .sidebar-header-info { font-size: 11px; }
+
+      .sidebar-footer { padding: 10px 12px; padding-bottom: calc(10px + var(--safe-bottom)); }
+      .sidebar-footer-btn { font-size: 12px; padding: 9px 10px; }
+      .sidebar-footer-btn svg { width: 15px; height: 15px; }
+
+      .messages-area::-webkit-scrollbar { width: 3px; }
+      .contacts-list::-webkit-scrollbar { width: 3px; }
     }
 
-    @media (max-width: 480px) {
-      .sidebar { width: 60px; min-width: 60px; }
-      .search-box, .contact-info, .group-filter, .ithub-logo, .sidebar-header-info { display: none !important; }
-      .contact-item { justify-content: center; padding: 12px 0; }
-      .avatar { margin-right: 0; width: 38px; height: 38px; font-size: 14px; }
-      .chat-header .chat-contact-status { font-size: 12px; }
-      .chat-header .chat-contact-name { font-size: 16px; }
-      .message-wrapper { max-width: 85%; }
-      .message-bubble { font-size: 14px; padding: 8px 14px; }
+    @media (max-width: 420px) {
+      .chat-header { padding: 8px 10px; padding-top: calc(8px + var(--safe-top)); }
+      .chat-header .chat-contact-name { font-size: 15px; }
+      .chat-header .chat-contact-status { font-size: 11px; }
+
+      .message-bubble {
+        font-size: 14px;
+        padding: 8px 12px;
+      }
+
+      .input-area { padding: 6px 8px; padding-bottom: calc(6px + var(--safe-bottom)); }
+
+      .contact-item { padding: 10px 14px; }
+      .contact-name { font-size: 14px; }
+      .contact-sub { font-size: 11px; }
+
+      .sidebar-header { padding: 10px 14px 8px; padding-top: calc(10px + var(--safe-top)); }
+      .sidebar-header-info { font-size: 11px; }
+
+      .profile-avatar-big { width: 72px; height: 72px; font-size: 26px; }
+      .modal { padding: 20px 16px; }
+
+      .mobile-menu-btn, .mobile-back-btn {
+        width: 36px;
+        height: 36px;
+      }
+
+      .header-action-btn {
+        width: 34px;
+        height: 34px;
+      }
     }
   </style>
 </head>
@@ -1269,29 +1447,15 @@
 
   <!-- ===== МЕССЕНДЖЕР ===== -->
   <div class="messenger" id="messenger">
-    <div class="sidebar">
-      <!-- Логотип ITHub MSG + имя пользователя под ним -->
+    <div class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <svg class="ithub-logo" viewBox="0 0 210 60" xmlns="http://www.w3.org/2000/svg">
-          <!-- Квадрат 1 (верх-лево) -->
           <rect x="4" y="8" width="20" height="20" fill="none" stroke-width="3" class="logo-dark"/>
-          <!-- Точка внутри первого квадрата — залитая -->
           <rect x="11" y="15" width="6" height="6" class="logo-dark-fill"/>
-
-          <!-- Квадрат 2 (верх-право) со скошенным верхним-правым углом -->
-          <path d="M 32 8 L 46 8 L 52 14 L 52 28 L 32 28 Z"
-                fill="none" stroke-width="3" class="logo-dark"/>
-
-          <!-- Квадрат 3 (низ-лево) -->
+          <path d="M 32 8 L 46 8 L 52 14 L 52 28 L 32 28 Z" fill="none" stroke-width="3" class="logo-dark"/>
           <rect x="4" y="32" width="20" height="20" fill="none" stroke-width="3" class="logo-dark"/>
-
-          <!-- Квадрат 4 (низ-право) -->
           <rect x="32" y="32" width="20" height="20" fill="none" stroke-width="3" class="logo-dark"/>
-
-          <!-- Текст ITHub -->
           <text x="64" y="26" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" class="logo-dark-text">ITHub</text>
-
-          <!-- Текст MSG -->
           <text x="64" y="49" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" class="logo-gray">MSG</text>
         </svg>
         <div class="sidebar-header-info" id="sidebar-user-info">Загрузка...</div>
@@ -1302,11 +1466,25 @@
         <input type="text" id="search-input" placeholder="Поиск контактов..." oninput="filterContacts()" />
       </div>
       <div class="contacts-list" id="contacts-list"></div>
+
+      <div class="sidebar-footer">
+        <button class="sidebar-footer-btn" onclick="openProfile()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Профиль
+        </button>
+        <button class="sidebar-footer-btn" onclick="openSettings()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Настройки
+        </button>
+      </div>
     </div>
 
-    <div class="chat-area">
+    <div class="chat-area" id="chat-area">
       <div class="chat-header">
         <div class="chat-header-left">
+          <button class="mobile-back-btn" onclick="backToContacts()" title="Назад">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          </button>
           <div class="avatar" id="chat-avatar" onclick="openContactProfile()" title="Открыть профиль">?</div>
           <div class="clickable-name" onclick="openContactProfile()">
             <div class="chat-contact-name" id="chat-contact-name">Выберите контакт</div>
@@ -1318,32 +1496,6 @@
           <button class="header-action-btn" id="search-msg-btn" onclick="toggleSearchMessages()" title="Поиск по сообщениям" style="display:none;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           </button>
-
-          <div class="user-menu-wrapper">
-            <div class="user-avatar-btn" id="user-avatar-btn" onclick="toggleDropdown()">
-              <span id="user-avatar-letters">?</span>
-            </div>
-            <div class="dropdown-menu" id="dropdown-menu">
-              <div class="dropdown-user-info">
-                <strong id="dropdown-user-name">Имя</strong>
-                <span id="dropdown-user-role">Роль</span>
-              </div>
-              <div class="dropdown-divider"></div>
-              <button class="dropdown-item" onclick="openProfile()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                Профиль
-              </button>
-              <button class="dropdown-item" onclick="openSettings()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                Настройки
-              </button>
-              <div class="dropdown-divider"></div>
-              <button class="dropdown-item logout" onclick="logout()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                Выйти
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -1381,13 +1533,12 @@
         <button class="btn-icon" onclick="attachFile()" title="Прикрепить файл">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
         </button>
+        <input type="text" id="message-input" placeholder="Сообщение..." disabled />
         <button class="btn-icon" onclick="toggleRecording()" title="Голосовое сообщение" id="voice-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
         </button>
-        <input type="text" id="message-input" placeholder="Введите сообщение..." disabled />
         <button class="btn-send" id="send-btn" disabled onclick="sendMessage()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          <span id="send-btn-text">Отправить</span>
         </button>
       </div>
 
@@ -1440,11 +1591,12 @@
   // ===== DOM =====
   const loginContainer = document.getElementById('login-container');
   const messenger = document.getElementById('messenger');
+  const sidebar = document.getElementById('sidebar');
+  const chatArea = document.getElementById('chat-area');
   const contactsList = document.getElementById('contacts-list');
   const messagesArea = document.getElementById('messages-area');
   const messageInput = document.getElementById('message-input');
   const sendBtn = document.getElementById('send-btn');
-  const sendBtnText = document.getElementById('send-btn-text');
   const chatContactName = document.getElementById('chat-contact-name');
   const chatContactStatus = document.getElementById('chat-contact-status');
   const chatAvatar = document.getElementById('chat-avatar');
@@ -1470,11 +1622,6 @@
   const imageViewer = document.getElementById('image-viewer');
   const imageViewerImg = document.getElementById('image-viewer-img');
 
-  const userAvatarBtn = document.getElementById('user-avatar-btn');
-  const dropdownMenu = document.getElementById('dropdown-menu');
-  const dropdownUserName = document.getElementById('dropdown-user-name');
-  const dropdownUserRole = document.getElementById('dropdown-user-role');
-
   const modalOverlay = document.getElementById('modal-overlay');
   const modalTitle = document.getElementById('modal-title');
   const modalBody = document.getElementById('modal-body');
@@ -1486,6 +1633,29 @@
     else document.body.classList.remove('dark');
   }
   applyTheme();
+
+  // ===== МОБИЛЬНАЯ НАВИГАЦИЯ =====
+  function isMobile() {
+    return window.innerWidth <= 768;
+  }
+
+  function openChatMobile() {
+    if (!isMobile()) return;
+    sidebar.classList.add('hidden');
+    chatArea.classList.add('visible');
+  }
+
+  function backToContacts() {
+    sidebar.classList.remove('hidden');
+    chatArea.classList.remove('visible');
+  }
+
+  window.addEventListener('resize', () => {
+    if (!isMobile()) {
+      sidebar.classList.remove('hidden');
+      chatArea.classList.remove('visible');
+    }
+  });
 
   // ===== УВЕДОМЛЕНИЯ =====
   function requestNotificationPermission() {
@@ -1503,7 +1673,7 @@
     try {
       const n = new Notification('ITHub — ' + fromName, {
         body: text,
-        icon: '/favicon.ico',
+        icon: '/icon-192.png',
         tag: 'ithub-msg'
       });
       setTimeout(() => n.close(), 5000);
@@ -1538,8 +1708,12 @@
   }
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && imageViewer.classList.contains('show')) {
-      closeImageViewer();
+    if (e.key === 'Escape') {
+      if (imageViewer.classList.contains('show')) {
+        closeImageViewer();
+      } else if (isMobile() && chatArea.classList.contains('visible')) {
+        backToContacts();
+      }
     }
   });
 
@@ -1615,10 +1789,7 @@
     const contact = contacts.find(c => c.id === currentContactId);
     if (!contact) return;
 
-    const sub = contact.role === 'teacher'
-      ? (contact.groups ? `Преподаватель · ${contact.groups.join(', ')}` : 'Преподаватель')
-      : (contact.group ? `Студент · ${contact.group}` : 'Студент');
-
+    const sub = contact.role === 'teacher' ? 'Преподаватель' : 'Студент';
     const st = getStatusText(contact.id);
     chatContactStatus.textContent = `${sub} · ${st.text}`;
     chatContactStatus.style.color = st.color;
@@ -1648,11 +1819,6 @@
           messenger.style.display = 'flex';
           messenger.style.flex = '1';
 
-          renderAvatar(userAvatarBtn, currentUser, 'big');
-          dropdownUserName.textContent = currentUser.fullName;
-          dropdownUserRole.textContent = currentUser.role === 'teacher' ? 'Преподаватель' : 'Студент';
-
-          // Надпись под логотипом
           sidebarUserInfo.textContent = `${currentUser.fullName} (${currentUser.role === 'teacher' ? 'Преподаватель' : 'Студент'})`;
 
           requestNotificationPermission();
@@ -1769,12 +1935,6 @@
           messageInput.addEventListener('input', handleTyping);
           document.addEventListener('paste', handlePaste);
 
-          document.addEventListener('click', (e) => {
-            if (!e.target.closest('.user-menu-wrapper')) {
-              dropdownMenu.classList.remove('show');
-            }
-          });
-
         } else {
           loginError.textContent = 'Неверный логин или пароль';
         }
@@ -1814,8 +1974,6 @@
     }, 2000);
   }
 
-  function toggleDropdown() { dropdownMenu.classList.toggle('show'); }
-
   function logout() {
     if (socket) socket.disconnect();
     currentUser = null;
@@ -1824,16 +1982,16 @@
     onlineUsers = [];
     messenger.style.display = 'none';
     loginContainer.style.display = 'flex';
-    dropdownMenu.classList.remove('show');
     document.title = 'ITHub Мессенджер';
     document.getElementById('email').value = '';
     document.getElementById('password').value = '';
     loginError.textContent = '';
     pendingMessages.clear();
+    sidebar.classList.remove('hidden');
+    chatArea.classList.remove('visible');
   }
 
   function openProfile() {
-    dropdownMenu.classList.remove('show');
     modalTitle.textContent = 'Профиль';
 
     const avatarHtml = currentUser.avatar
@@ -1881,7 +2039,6 @@
       .then(data => {
         if (data.success) {
           currentUser.avatar = data.filename;
-          renderAvatar(userAvatarBtn, currentUser, 'big');
           const bigAvatar = document.querySelector('.profile-avatar-big');
           if (bigAvatar) {
             bigAvatar.innerHTML = `<img src="/uploads/${data.filename}" /><div class="overlay">Сменить</div>`;
@@ -1993,7 +2150,6 @@
   }
 
   function openSettings() {
-    dropdownMenu.classList.remove('show');
     modalTitle.textContent = 'Настройки';
     const isDark = document.body.classList.contains('dark');
 
@@ -2017,6 +2173,16 @@
           <div class="desc">Показывать уведомления о новых сообщениях</div>
         </div>
         <div class="toggle ${localStorage.getItem('notifications') !== 'false' ? 'active' : ''}" onclick="toggleNotifications(this)"><div class="knob"></div></div>
+      </div>
+      <div class="settings-field">
+        <div>
+          <div class="label" style="color:var(--danger);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--danger);"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Выйти из аккаунта
+          </div>
+          <div class="desc">Завершить текущую сессию</div>
+        </div>
+        <button class="profile-action-btn" style="flex:0; padding:8px 16px; color:var(--danger); border-color:var(--danger);" onclick="logout()">Выйти</button>
       </div>
     `;
     modalOverlay.classList.add('show');
@@ -2194,7 +2360,6 @@
 
     messageInput.disabled = false;
     sendBtn.disabled = false;
-    messageInput.focus();
 
     document.querySelectorAll('.contact-item').forEach(el => el.classList.remove('active'));
     const items = contactsList.querySelectorAll('.contact-item');
@@ -2212,6 +2377,10 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ from: contactId, to: currentUser.id })
     });
+
+    openChatMobile();
+
+    setTimeout(() => messageInput.focus(), 350);
   }
 
   function loadMessages(contactId) {
@@ -2310,37 +2479,59 @@
     wrapper.appendChild(bubble);
     wrapper.appendChild(time);
 
+    let longPressTimer = null;
+
     wrapper.addEventListener('contextmenu', (e) => {
       e.preventDefault();
-      const msgId = wrapper.dataset.msgId;
-      if (!msgId) return;
+      showMessageMenu(e.clientX, e.clientY, msg, bubble, wrapper, type);
+    });
 
-      let text = '';
-      const voiceEl = bubble.querySelector('.voice-message');
-      const imgEl = bubble.querySelector('img');
-      const linkEl = bubble.querySelector('a');
-      if (voiceEl) text = '🎤 Голосовое';
-      else if (imgEl) text = '🖼 Изображение';
-      else if (linkEl) text = '📎 Файл';
-      else {
-        const clone = bubble.cloneNode(true);
-        clone.querySelectorAll('.message-edited, .reply-quote').forEach(el => el.remove());
-        text = clone.textContent.trim();
-      }
+    wrapper.addEventListener('touchstart', (e) => {
+      longPressTimer = setTimeout(() => {
+        const touch = e.touches[0];
+        showMessageMenu(touch.clientX, touch.clientY, msg, bubble, wrapper, type);
+        if (navigator.vibrate) navigator.vibrate(30);
+      }, 500);
+    }, { passive: true });
 
-      const msgObj = {
-        id: parseInt(msgId),
-        text: text,
-        from_user: type === 'my' ? currentUser.id : (msg.from_user || null),
-        isMine: type === 'my',
-        voice: voiceEl ? true : null,
-        file: (imgEl || linkEl) ? true : null
-      };
-      showContextMenu(e.clientX, e.clientY, msgObj, wrapper);
+    wrapper.addEventListener('touchend', () => {
+      if (longPressTimer) clearTimeout(longPressTimer);
+    });
+
+    wrapper.addEventListener('touchmove', () => {
+      if (longPressTimer) clearTimeout(longPressTimer);
     });
 
     messagesArea.appendChild(wrapper);
     scrollToBottom();
+  }
+
+  function showMessageMenu(x, y, msg, bubble, wrapper, type) {
+    const msgId = wrapper.dataset.msgId;
+    if (!msgId) return;
+
+    let text = '';
+    const voiceEl = bubble.querySelector('.voice-message');
+    const imgEl = bubble.querySelector('img');
+    const linkEl = bubble.querySelector('a');
+    if (voiceEl) text = '🎤 Голосовое';
+    else if (imgEl) text = '🖼 Изображение';
+    else if (linkEl) text = '📎 Файл';
+    else {
+      const clone = bubble.cloneNode(true);
+      clone.querySelectorAll('.message-edited, .reply-quote').forEach(el => el.remove());
+      text = clone.textContent.trim();
+    }
+
+    const msgObj = {
+      id: parseInt(msgId),
+      text: text,
+      from_user: type === 'my' ? currentUser.id : (msg.from_user || null),
+      isMine: type === 'my',
+      voice: voiceEl ? true : null,
+      file: (imgEl || linkEl) ? true : null
+    };
+    showContextMenu(x, y, msgObj, wrapper);
   }
 
   function createVoicePlayer(fileName) {
@@ -2454,6 +2645,10 @@
         menu.remove();
         document.removeEventListener('click', closeMenu);
       });
+      document.addEventListener('touchstart', function closeMenu() {
+        menu.remove();
+        document.removeEventListener('touchstart', closeMenu);
+      });
     }, 10);
   }
 
@@ -2483,9 +2678,6 @@
     messageInput.focus();
     messageInput.setSelectionRange(msg.text.length, msg.text.length);
     inputArea.classList.add('editing');
-    sendBtnText.textContent = 'Сохранить';
-    const sendIcon = sendBtn.querySelector('svg');
-    if (sendIcon) sendIcon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
   }
 
   function cancelEdit() {
@@ -2494,9 +2686,6 @@
     editPanel.classList.remove('show');
     messageInput.value = '';
     inputArea.classList.remove('editing');
-    sendBtnText.textContent = 'Отправить';
-    const sendIcon = sendBtn.querySelector('svg');
-    if (sendIcon) sendIcon.innerHTML = '<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>';
     messageInput.focus();
   }
 
@@ -2747,17 +2936,15 @@
     messagesArea.scrollTop = messagesArea.scrollHeight;
   }
 
-  console.log('✅ ITHub Messenger v16.0 (Логотип с прозрачными квадратами) загружен');
-</script>
-<script>
-  // ===== РЕГИСТРАЦИЯ SERVICE WORKER (PWA) =====
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/service-worker.js')
-        .then((reg) => console.log('✅ Service Worker зарегистрирован'))
+        .then(() => console.log('✅ Service Worker зарегистрирован'))
         .catch((err) => console.error('❌ Ошибка SW:', err));
     });
   }
+
+  console.log('✅ ITHub Messenger v19.0 (Без иконки профиля в шапке чата) загружен');
 </script>
 </body>
 </html>
