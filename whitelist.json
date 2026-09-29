@@ -3,7 +3,7 @@
     {
       "id": 1,
       "login": "111",
-      "password": "$2a$10$ZgWVihdwKcsqzt9BIvAWh.PACkYUaexhcpSKSsjOvXmoko3C.jOkC",
+      "password": "111",
       "role": "teacher",
       "fullName": "Анна Петрова",
       "groups": [
@@ -16,8 +16,8 @@
         "Web-разработка",
         "Базы данных"
       ],
-      "avatar": "avatar_1789143432807.jpg",
-      "lastSeen": "2026-09-11T16:22:06.975Z"
+      "avatar": "avatar_1790709147123.jpg",
+      "lastSeen": "2026-09-29T19:32:13.315Z"
     },
     {
       "id": 2,
